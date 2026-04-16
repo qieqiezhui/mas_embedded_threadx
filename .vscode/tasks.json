@@ -1,0 +1,166 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            // 交互式构建：提示选择板子和构建类型
+            "label": "Build STM32",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/build.bat",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "echo": true,
+                "showReuseMessage": false,
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Build damiao_h7",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/build.bat damiao_h7 Debug",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "echo": true,
+                "showReuseMessage": false,
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Build dji_c",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/build.bat dji_c Debug",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "echo": true,
+                "showReuseMessage": false,
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+
+        // ── ST-Link ─────────────────────────────────────────────────
+        {
+            "label": "Flash [ST-Link] damiao_h7",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/flash.bat damiao_h7 stlink",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "echo": true,
+                "showReuseMessage": false,
+                "close": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Flash [ST-Link] dji_c",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/flash.bat dji_c stlink",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "echo": true,
+                "showReuseMessage": false,
+                "close": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+
+        // ── DAPLink ──────────────────────────────────────────────────
+        {
+            "label": "Flash [DAPLink] damiao_h7",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/flash.bat damiao_h7 daplink",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "echo": true,
+                "showReuseMessage": false,
+                "close": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Flash [DAPLink] dji_c",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/flash.bat dji_c daplink",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "echo": true,
+                "showReuseMessage": false,
+                "close": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+
+        // ── J-Link ───────────────────────────────────────────────────
+        {
+            "label": "Flash [J-Link] damiao_h7",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/flash.bat damiao_h7 jlink",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "echo": true,
+                "showReuseMessage": false,
+                "close": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Flash [J-Link] dji_c",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/flash.bat dji_c jlink",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true,
+                "echo": true,
+                "showReuseMessage": false,
+                "close": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        }
+    ]
+}

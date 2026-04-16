@@ -1,0 +1,19 @@
+# clang-format-ignore: 指定不需要格式化的目录/文件
+# 只格式化 app/ modules/ utils/ bsp/ 目录
+
+# FreeRTOS 内核源码
+FreeRTOS/
+
+# FreeRTOS 配置
+FreeRTOS_Config/
+
+# STM32CubeMX 生成的代码和驱动库
+board/dji_c/Drivers/
+board/dji_c/Src/
+board/dji_c/Inc/
+board/damiao_h7/Drivers/
+board/damiao_h7/Core/
+
+# 构建目录
+build/
+.cache/
