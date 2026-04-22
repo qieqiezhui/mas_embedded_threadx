@@ -152,6 +152,18 @@ SECTIONS
     . = ALIGN(4);
   } >FLASH
 
+  .itcmram :
+	{
+	  . = ALIGN(4);
+	  PROVIDE_HIDDEN (__itcmram_start = .);     /* 定义 ITCM 起始符号 */
+	  *(.itcmram)                               /* 匹配 .itcmram 段 */
+	  *(.itcmram*)                              /* 匹配 .itcmram* 段 */
+	  . = ALIGN(4);
+	  PROVIDE_HIDDEN (__itcmram_end = .);       /* 定义 ITCM 结束符号 */
+	} >ITCMRAM AT> FLASH
+	/* 记录 ITCM 在 FLASH 中的加载地址 (LMA) */
+	__itcmram_load = LOADADDR(.itcmram);
+
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 
@@ -229,6 +241,33 @@ SECTIONS
 
   PROVIDE( __bss_start = __tbss_start );
   PROVIDE( __bss_size = __bss_end - __bss_start );
+
+  /* RAM_D1 section for application data - NOLOAD means no initialization from Flash */
+  .RAM_D1 (NOLOAD) :
+  {
+    . = ALIGN(4);
+    *(.RAM_D1)
+    *(.RAM_D1*)
+    . = ALIGN(4);
+  } >RAM_D1
+
+  /* RAM_D2 section for application data - NOLOAD means no initialization from Flash */
+  .RAM_D2 (NOLOAD) :
+  {
+    . = ALIGN(4);
+    *(.RAM_D2)
+    *(.RAM_D2*)
+    . = ALIGN(4);
+  } >RAM_D2
+
+  /* RAM_D3 section for application data - NOLOAD means no initialization from Flash */
+  .RAM_D3 (NOLOAD) :
+  {
+    . = ALIGN(4);
+    *(.RAM_D3)
+    *(.RAM_D3*)
+    . = ALIGN(4);
+  } >RAM_D3
 
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack (NOLOAD) :
