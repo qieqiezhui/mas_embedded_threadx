@@ -55,6 +55,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern PCD_HandleTypeDef   hpcd_USB_OTG_HS;
 extern DMA_HandleTypeDef   hdma_adc1;
 extern ADC_HandleTypeDef   hadc1;
 extern FDCAN_HandleTypeDef hfdcan1;
@@ -85,7 +86,6 @@ extern UART_HandleTypeDef  huart1;
 extern UART_HandleTypeDef  huart2;
 extern UART_HandleTypeDef  huart3;
 extern UART_HandleTypeDef  huart10;
-extern PCD_HandleTypeDef   hpcd_USB_OTG_HS;
 extern TIM_HandleTypeDef   htim23;
 
 /* USER CODE BEGIN EV */
