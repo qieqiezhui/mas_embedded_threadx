@@ -54,9 +54,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#define BTYE_POOL_SIZE 10240
-static UCHAR tx_byte_pool_buffer[BTYE_POOL_SIZE];
-TX_BYTE_POOL tx_app_byte_pool;
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -257,9 +255,6 @@ void PeriphCommonClock_Config(void)
 /* USER CODE BEGIN 4 */
 void tx_application_define(void *first_unused_memory)
 {
-    /* Create a byte memory pool from which to allocate the thread stacks.  */
-    tx_byte_pool_create(&tx_app_byte_pool, "byte pool 0", tx_byte_pool_buffer, BTYE_POOL_SIZE);
-
     Robot_Init();
 }
 /* USER CODE END 4 */
