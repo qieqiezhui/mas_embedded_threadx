@@ -8,7 +8,7 @@ add_library(utils OBJECT
     kfifo/kfifo.c
 )
 
-target_compile_options(utils PRIVATE -O2 -flto)
+target_compile_options(utils PRIVATE -O2)
 
 target_include_directories(utils PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
