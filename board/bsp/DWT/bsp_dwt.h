@@ -14,29 +14,33 @@
 #if defined(STM32H723xx)
 #include "stm32h723xx.h"
 
-#define BSP_DWT_MEASURE_START() \
-    do { \
-        uint32_t __dwt_start_time = DWT->CYCCNT; \
-        
-#define BSP_DWT_MEASURE_END(function_name) \
-        uint32_t __dwt_end_time = DWT->CYCCNT; \
-        uint32_t __dwt_cycles = __dwt_end_time - __dwt_start_time; \
-        float __dwt_us_time = (float)__dwt_cycles / (480000000 / 1000000.0f); \
-        log_d("[PERF] %s: %lu cycles, %.2f us", function_name, __dwt_cycles, __dwt_us_time); \
-    } while(0)
+#define BSP_DWT_MEASURE_START()                                                                                                                      \
+    do                                                                                                                                               \
+    {                                                                                                                                                \
+        uint32_t __dwt_start_time = DWT->CYCCNT;
+
+#define BSP_DWT_MEASURE_END(function_name)                                                                                                           \
+    uint32_t __dwt_end_time = DWT->CYCCNT;                                                                                                           \
+    uint32_t __dwt_cycles   = __dwt_end_time - __dwt_start_time;                                                                                     \
+    float    __dwt_us_time  = (float)__dwt_cycles / (480000000 / 1000000.0f);                                                                        \
+    LOG_I("[PERF] %s: %lu cycles, %.2f us", function_name, __dwt_cycles, __dwt_us_time);                                                             \
+    }                                                                                                                                                \
+    while (0)
 #elif defined(STM32F407xx)
 #include "stm32f407xx.h"
 
-#define BSP_DWT_MEASURE_START() \
-    do { \
-        uint32_t __dwt_start_time = DWT->CYCCNT; \
-        
-#define BSP_DWT_MEASURE_END(function_name) \
-        uint32_t __dwt_end_time = DWT->CYCCNT; \
-        uint32_t __dwt_cycles = __dwt_end_time - __dwt_start_time; \
-        float __dwt_us_time = (float)__dwt_cycles / (168000000 / 1000000.0f); \
-        log_d("[PERF] %s: %lu cycles, %.2f us", function_name, __dwt_cycles, __dwt_us_time); \
-    } while(0)
+#define BSP_DWT_MEASURE_START()                                                                                                                      \
+    do                                                                                                                                               \
+    {                                                                                                                                                \
+        uint32_t __dwt_start_time = DWT->CYCCNT;
+
+#define BSP_DWT_MEASURE_END(function_name)                                                                                                           \
+    uint32_t __dwt_end_time = DWT->CYCCNT;                                                                                                           \
+    uint32_t __dwt_cycles   = __dwt_end_time - __dwt_start_time;                                                                                     \
+    float    __dwt_us_time  = (float)__dwt_cycles / (168000000 / 1000000.0f);                                                                        \
+    LOG_I("[PERF] %s: %lu cycles, %.2f us", function_name, __dwt_cycles, __dwt_us_time);                                                             \
+    }                                                                                                                                                \
+    while (0)
 #endif
 
 /**
