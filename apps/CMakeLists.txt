@@ -35,7 +35,7 @@ add_library(app OBJECT
     ${_robot_sources}
 )
 
-target_compile_options(app PRIVATE -O2)
+target_compile_options(app PRIVATE -O2 -include module_config.h)
 
 target_include_directories(app PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
