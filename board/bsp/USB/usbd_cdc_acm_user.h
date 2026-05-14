@@ -1,3 +1,11 @@
+/*
+ * @Author: laladuduqq 2807523947@qq.com
+ * @Date: 2026-05-09 20:31:13
+ * @LastEditors: laladuduqq 2807523947@qq.com
+ * @LastEditTime: 2026-05-14 19:39:14
+ * @FilePath: /mas_embedded_threadx/board/bsp/USB/usbd_cdc_acm_user.h
+ * @Description:
+ */
 #ifndef USBD_CDC_ACM_USER_H
 #define USBD_CDC_ACM_USER_H
 
@@ -14,25 +22,20 @@ void cdc_acm_init(uint8_t busid, uintptr_t reg_base);
 
 /**
  * @brief  通过 CDC ACM 批量 IN 端点发送数据
- * @param data  待发送数据指针
- * @param len   数据字节数（不超过 CDC_MAX_MPS）
+ * @param data    发送数据指针
+ * @param len     发送字节数
+ * @param timeout 发送超时时间
+ * @return        true: 成功发送数据  false: 超时或参数无效
+ */
+int cdc_acm_send(const uint8_t *data, uint32_t len, uint32_t timeout);
+
+/**
+ * @brief  通过 CDC ACM 批量 OUT 端点接收数据
+ * @param data  接收缓冲区指针
+ * @param rx_len 接收字节数指针
  * @param timeout  超时时间
- * @return      true: 传输已启动  false: 上次传输未完成 / 参数无效
+ * @return      true: 成功接收数据  false: 超时或参数无效
  */
-bool cdc_acm_send(const uint8_t *data, uint32_t len, uint32_t timeout);
-
-/**
- * @brief  获取接收缓冲区中可读的字节数
- * @return 可读字节数
- */
-uint32_t cdc_acm_available(void);
-
-/**
- * @brief  从接收缓冲区读取数据
- * @param data  存放读取数据的缓冲区
- * @param len   期望读取的最大字节数
- * @return      实际读取的字节数
- */
-uint32_t cdc_acm_recv(uint8_t *data, uint32_t len);
+int cdc_acm_recv(uint8_t *data, uint32_t *rx_len, uint32_t timeout);
 
 #endif

@@ -5,6 +5,9 @@
 #include "kfifo.h"
 #include "tx_api.h"
 
+/* 事件标志位定义 */
+#define BSP_USB_EVENT_RX ((ULONG)0x01) /* RX 数据就绪 */
+#define BSP_USB_EVENT_TX ((ULONG)0x02) /* TX 发送完成 */
 
 /* 端点地址 */
 #define CDC_IN_EP          0x81
@@ -95,7 +98,7 @@ USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t cdc_read_buffer[CDC_RX_FIFO_SIZE]
 USB_NOCACHE_RAM_SECTION USB_MEM_ALIGNX uint8_t cdc_write_buffer[CDC_MAX_MPS];
 
 static struct kfifo cdc_rx_fifo;
-static TX_SEMAPHORE tx_sem;
+static TX_EVENT_FLAGS_GROUP usb_event_flags;
 
 /* USB 设备事件回调 */
 
@@ -115,8 +118,8 @@ static void usbd_event_handler(uint8_t busid, uint8_t event)
     case USBD_EVENT_SUSPEND:
         break;
     case USBD_EVENT_CONFIGURED:
-        tx_semaphore_put(&tx_sem);
-        /* 启动首个 OUT 端点读传输，目标地址指向 kfifo 当前写入位置 */
+        /* 初始 TX 就绪标志，启动首个 OUT 端点读传输 */
+        tx_event_flags_set(&usb_event_flags, BSP_USB_EVENT_TX, TX_OR);
         usbd_ep_start_read(busid, CDC_OUT_EP, cdc_read_buffer + (cdc_rx_fifo.in & cdc_rx_fifo.mask), CDC_MAX_MPS);
         break;
     case USBD_EVENT_SET_REMOTE_WAKEUP:
@@ -162,6 +165,9 @@ void usbd_cdc_acm_bulk_out(uint8_t busid, uint8_t ep, uint32_t nbytes)
     }
 
     usbd_ep_start_read(busid, CDC_OUT_EP, cdc_read_buffer + pos, CDC_MAX_MPS);
+
+    /* 通知等待读取的任务有新数据 */
+    tx_event_flags_set(&usb_event_flags, BSP_USB_EVENT_RX, TX_OR);
 }
 
 /**
@@ -179,7 +185,7 @@ void usbd_cdc_acm_bulk_in(uint8_t busid, uint8_t ep, uint32_t nbytes)
     }
     else
     {
-        tx_semaphore_put(&tx_sem);
+        tx_event_flags_set(&usb_event_flags, BSP_USB_EVENT_TX, TX_OR);
     }
 }
 
@@ -197,7 +203,7 @@ static struct usbd_interface intf1;
 void cdc_acm_init(uint8_t busid, uintptr_t reg_base)
 {
     kfifo_init(&cdc_rx_fifo, cdc_read_buffer, CDC_RX_FIFO_SIZE, 1);
-    tx_semaphore_create(&tx_sem, "cdc_tx", 1);
+    tx_event_flags_create(&usb_event_flags, "usb_evt");
 
     usbd_desc_register(busid, &cdc_descriptor);
 
@@ -210,18 +216,38 @@ void cdc_acm_init(uint8_t busid, uintptr_t reg_base)
 }
 
 
-bool cdc_acm_send(const uint8_t *data, uint32_t len, uint32_t timeout)
+int cdc_acm_send(const uint8_t *data, uint32_t len, uint32_t timeout)
 {
-    if (tx_semaphore_get(&tx_sem, timeout) != TX_SUCCESS || len > CDC_MAX_MPS || data == NULL)
+    if (!data || len == 0 || len > CDC_MAX_MPS)
     {
-        return false;
+        return -1;
+    }
+
+    /* 等待上次发送完成 */
+    ULONG actual_flags = 0;
+    if (tx_event_flags_get(&usb_event_flags, BSP_USB_EVENT_TX, TX_OR_CLEAR, &actual_flags, timeout) != TX_SUCCESS)
+    {
+        return -1;
     }
 
     memcpy(cdc_write_buffer, data, len);
     usbd_ep_start_write(0, CDC_IN_EP, cdc_write_buffer, len);
-    return true;
+    return (int)len;
 }
 
-uint32_t cdc_acm_available(void) { return kfifo_len(&cdc_rx_fifo); }
+int cdc_acm_recv(uint8_t *data, uint32_t *rx_len, uint32_t timeout)
+{
+    /* 等待 RX 数据就绪 */
+    ULONG actual_flags = 0;
+    if (tx_event_flags_get(&usb_event_flags, BSP_USB_EVENT_RX, TX_OR_CLEAR, &actual_flags, timeout) != TX_SUCCESS)
+    {
+        if (rx_len) *rx_len = 0;
+        return -1;
+    }
 
-uint32_t cdc_acm_recv(uint8_t *data, uint32_t len) { return kfifo_out(&cdc_rx_fifo, data, len); }
+    /* 从 kfifo 读出所有可用数据 */
+    uint32_t avail  = kfifo_len(&cdc_rx_fifo);
+    uint32_t actual = kfifo_out(&cdc_rx_fifo, data, avail);
+    if (rx_len) *rx_len = actual;
+    return (int)actual;
+}
