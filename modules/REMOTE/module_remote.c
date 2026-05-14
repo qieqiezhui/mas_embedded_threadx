@@ -23,6 +23,8 @@ static TX_THREAD                  g_remote_ctrl_task;                          /
 static TX_THREAD                  g_vt_task;                                   /* 图传解码任务 */
 APPS_STACK_SECTION static uint8_t g_remote_ctrl_stack[REMOTE_TASK_STACK_SIZE]; /* 遥控器任务栈 */
 APPS_STACK_SECTION static uint8_t g_vt_task_stack[REMOTE_TASK_STACK_SIZE];     /* 图传任务栈 */
+static Offline_Device            *g_rc_offline = NULL;                         /* 遥控器离线设备句柄 */
+static Offline_Device            *g_vt_offline = NULL;                         /* 图传离线设备句柄 */
 
 /**
  * @brief 遥控器解码任务
@@ -34,9 +36,9 @@ static void remote_ctrl_task_entry(ULONG arg)
     while (1)
     {
 #if (REMOTE_SOURCE == 1)
-        remote_sbus_decode(&g_remote_data);
+        remote_sbus_decode(&g_remote_data, g_rc_offline);
 #elif (REMOTE_SOURCE == 2)
-        remote_dt7_decode(&g_remote_data);
+        remote_dt7_decode(&g_remote_data, g_rc_offline);
 #else
         tx_thread_sleep(100);
 #endif
@@ -53,9 +55,9 @@ static void vt_task_entry(ULONG arg)
     while (1)
     {
 #if (REMOTE_VT_SOURCE == 1)
-        remote_vt02_decode(&g_remote_data);
+        remote_vt02_decode(&g_remote_data, g_vt_offline);
 #elif (REMOTE_VT_SOURCE == 2)
-        remote_vt03_decode(&g_remote_data);
+        remote_vt03_decode(&g_remote_data, g_vt_offline);
 #else
         tx_thread_sleep(100);
 #endif
@@ -70,13 +72,13 @@ void Module_Remote_init(void)
 
     /* ── 初始化遥控器子模块 ── */
 #if (REMOTE_SOURCE == 1)
-    if (remote_sbus_init() != TX_SUCCESS)
+    if (remote_sbus_init(&g_rc_offline) != TX_SUCCESS)
     {
         LOG_E("SBUS init failed");
         return;
     }
 #elif (REMOTE_SOURCE == 2)
-    if (remote_dt7_init() != TX_SUCCESS)
+    if (remote_dt7_init(&g_rc_offline) != TX_SUCCESS)
     {
         LOG_E("DT7 init failed");
         return;
@@ -85,13 +87,13 @@ void Module_Remote_init(void)
 
     /* ── 初始化图传子模块 ── */
 #if (REMOTE_VT_SOURCE == 1)
-    if (remote_vt02_init() != TX_SUCCESS)
+    if (remote_vt02_init(&g_vt_offline) != TX_SUCCESS)
     {
         LOG_E("VT02 init failed");
         return;
     }
 #elif (REMOTE_VT_SOURCE == 2)
-    if (remote_vt03_init() != TX_SUCCESS)
+    if (remote_vt03_init(&g_vt_offline) != TX_SUCCESS)
     {
         LOG_E("VT03 init failed");
         return;
@@ -120,7 +122,7 @@ void Module_Remote_init(void)
     LOG_I("Remote module initialized (RC=%d, VT=%d)", REMOTE_SOURCE, REMOTE_VT_SOURCE);
 }
 
-const Remote_Data_t *Module_Remote_get_data(void)
+Remote_Data_t *Module_Remote_get_data(void)
 {
     if (!g_initialized) return NULL;
     return &g_remote_data;
@@ -132,13 +134,13 @@ int16_t Module_Remote_get_channel(uint8_t ch)
     return g_remote_data.channels[ch - 1];
 }
 
-const mouse_state_t *Module_Remote_get_mouse(void)
+mouse_state_t *Module_Remote_get_mouse(void)
 {
     if (!g_initialized) return NULL;
     return &g_remote_data.mouse;
 }
 
-const keyboard_state_t *Module_Remote_get_keyboard(void)
+keyboard_state_t *Module_Remote_get_keyboard(void)
 {
     if (!g_initialized) return NULL;
     return &g_remote_data.keyboard;
@@ -148,4 +150,15 @@ int16_t Module_Remote_get_wheel(void)
 {
     if (!g_initialized) return 0;
     return g_remote_data.wheel;
+}
+
+uint8_t Module_Remote_get_offline_status(void)
+{
+    uint8_t rc_status = Module_Offline_get_device_status(g_rc_offline);
+    uint8_t vt_status = Module_Offline_get_device_status(g_vt_offline);
+
+    uint8_t result = 0;
+    if (rc_status == STATE_ONLINE) result |= 0x01; /* bit0: 遥控器在线 */
+    if (vt_status == STATE_ONLINE) result |= 0x02; /* bit1: 图传在线   */
+    return result;
 }

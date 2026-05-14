@@ -11,6 +11,7 @@
 
 #include "module_remote.h"
 #include <stdint.h>
+#include "module_offline.h"
 
 #define SBUS_CHX_BIAS ((uint16_t)1024)
 #define SBUS_CHX_UP   ((uint16_t)240)
@@ -18,14 +19,16 @@
 
 /**
  * @brief SBUS 初始化 (配置 UART + 注册 offline)
+ * @param out_offline 输出离线设备句柄指针，NULL 则不输出
  * @return 0 成功, -1 失败
  */
-int8_t remote_sbus_init(void);
+int8_t remote_sbus_init(Offline_Device **out_offline);
 
 /**
  * @brief SBUS 单帧解码, 直接写入统一结构体
  * @param data 统一遥控数据结构指针
+ * @param offline 离线设备句柄 (用于心跳上报)
  */
-void remote_sbus_decode(Remote_Data_t *data);
+void remote_sbus_decode(Remote_Data_t *data, Offline_Device *offline);
 
 #endif // _SBUS_H_

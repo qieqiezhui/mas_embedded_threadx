@@ -16,10 +16,9 @@
 /* 模块内部变量 */
 BUFFER_SECTION static uint8_t dt7_rx_buf[64];  /* 接收缓冲区 */
 static UART_Device           *dt7_uart;        /* UART 设备 */
-static Offline_Device        *dt7_offline;     /* 离线设备 */
 static bool                   dt7_initialized; /* 初始化标志 */
 
-int8_t remote_dt7_init(void)
+int8_t remote_dt7_init(Offline_Device **out_offline)
 {
     REMOTE_UART.Init.BaudRate = 100000;
     if (HAL_UART_Init(&REMOTE_UART) != HAL_OK)
@@ -34,12 +33,13 @@ int8_t remote_dt7_init(void)
         .beep_times = 0,
         .enable     = 1,
     };
-    dt7_offline = Module_Offline_register(&offline_cfg);
-    if (dt7_offline == NULL)
+    Offline_Device *offline = Module_Offline_register(&offline_cfg);
+    if (offline == NULL)
     {
         LOG_E("offline register error");
         return -1;
     }
+    if (out_offline) *out_offline = offline;
 
     UART_Device_init_config uart_cfg = {
         .huart           = &REMOTE_UART,
@@ -61,7 +61,7 @@ int8_t remote_dt7_init(void)
     return 0;
 }
 
-void remote_dt7_decode(Remote_Data_t *data)
+void remote_dt7_decode(Remote_Data_t *data, Offline_Device *offline)
 {
     if (!dt7_initialized || !data) return;
 
@@ -117,12 +117,12 @@ void remote_dt7_decode(Remote_Data_t *data)
     if (abs(wheel) <= REMOTE_DEAD_ZONE * 10) wheel = 0;
     data->wheel = wheel;
 
-    Module_Offline_device_update(dt7_offline);
+    if (offline) Module_Offline_device_update(offline);
 }
 
 #else
 
-int8_t remote_dt7_init(void) { return -1; }
-void   remote_dt7_decode(Remote_Data_t *data) { (void)data; }
+int8_t remote_dt7_init(Offline_Device **out_offline) { (void)out_offline; return -1; }
+void   remote_dt7_decode(Remote_Data_t *data, Offline_Device *offline) { (void)data; (void)offline; }
 
 #endif

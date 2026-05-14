@@ -2,9 +2,9 @@
  * @Author: laladuduqq 2807523947@qq.com
  * @Date: 2026-05-13 15:10:40
  * @LastEditors: laladuduqq 2807523947@qq.com
- * @LastEditTime: 2026-05-14 15:19:44
+ * @LastEditTime: 2026-05-14 16:47:22
  * @FilePath: /mas_embedded_threadx/modules/BOARDCOMM/module_boardcomm.h
- * @Description: 
+ * @Description:
  */
 #ifndef _MODULE_BOARDCOMM_H_
 #define _MODULE_BOARDCOMM_H_
@@ -46,5 +46,11 @@ void Module_BoardComm_Send(const uint8_t *data, uint8_t len);
  * @note 只能注册一个回调，重复调用会覆盖；NULL 表示注销
  */
 void Module_BoardComm_RegisterRx(BoardComm_RxCallback_t callback);
+
+/**
+ * @brief 获取板间通信离线状态
+ * @return 0 表示在线，1 表示离线
+ */
+uint8_t Module_BoardComm_Get_Offline_State(void);
 
 #endif // _MODULE_BOARDCOMM_H_

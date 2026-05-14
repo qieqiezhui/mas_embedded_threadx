@@ -26,10 +26,9 @@
 /* 模块内部变量 */
 BUFFER_SECTION static uint8_t vt03_rx_buf[64];  /* 接收缓冲区 */
 static UART_Device           *vt03_uart;        /* UART 设备 */
-static Offline_Device        *vt03_offline;     /* 离线设备 */
 static bool                   vt03_initialized; /* 初始化标志 */
 
-int8_t remote_vt03_init(void)
+int8_t remote_vt03_init(Offline_Device **out_offline)
 {
     REMOTE_VT_UART.Init.BaudRate = 921600;
     if (HAL_UART_Init(&REMOTE_VT_UART) != HAL_OK)
@@ -44,12 +43,13 @@ int8_t remote_vt03_init(void)
         .beep_times = 0,
         .enable     = 1,
     };
-    vt03_offline = Module_Offline_register(&offline_cfg);
-    if (vt03_offline == NULL)
+    Offline_Device *offline = Module_Offline_register(&offline_cfg);
+    if (offline == NULL)
     {
         LOG_E("offline register error");
         return -1;
     }
+    if (out_offline) *out_offline = offline;
 
     UART_Device_init_config uart_cfg = {
         .huart           = &REMOTE_VT_UART,
@@ -71,7 +71,7 @@ int8_t remote_vt03_init(void)
     return TX_SUCCESS;
 }
 
-void remote_vt03_decode(Remote_Data_t *data)
+void remote_vt03_decode(Remote_Data_t *data, Offline_Device *offline)
 {
     if (!vt03_initialized || !data) return;
 
@@ -131,12 +131,12 @@ void remote_vt03_decode(Remote_Data_t *data)
     /* 键盘 */
     data->keyboard.key_code = buf[17] | (buf[18] << 8);
 
-    Module_Offline_device_update(vt03_offline);
+    if (offline) Module_Offline_device_update(offline);
 }
 
 #else
 
-int8_t remote_vt03_init(void) { return -1; }
-void   remote_vt03_decode(Remote_Data_t *data) { (void)data; }
+int8_t remote_vt03_init(Offline_Device **out_offline) { (void)out_offline; return -1; }
+void   remote_vt03_decode(Remote_Data_t *data, Offline_Device *offline) { (void)data; (void)offline; }
 
 #endif

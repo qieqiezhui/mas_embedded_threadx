@@ -63,3 +63,12 @@ const Module_SuperCap_t *Module_SuperCap_Get(void)
     }
     return NULL;
 }
+
+uint8_t Module_SuperCap_Get_offline_state(void)
+{
+    if (module_supercap.offline_dev == NULL)
+    {
+        return STATE_OFFLINE; // 如果离线设备未初始化，默认返回离线状态
+    }
+    return Module_Offline_get_device_status(module_supercap.offline_dev);
+}

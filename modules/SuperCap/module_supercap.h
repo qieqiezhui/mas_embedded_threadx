@@ -1,3 +1,11 @@
+/*
+ * @Author: laladuduqq 2807523947@qq.com
+ * @Date: 2026-05-10 22:54:13
+ * @LastEditors: laladuduqq 2807523947@qq.com
+ * @LastEditTime: 2026-05-14 16:50:01
+ * @FilePath: /mas_embedded_threadx/modules/SuperCap/module_supercap.h
+ * @Description:
+ */
 #ifndef _MODULE_SUPERCAP_H_
 #define _MODULE_SUPERCAP_H_
 
@@ -44,5 +52,7 @@ void Module_SuperCap_Init(void);
 void Module_SuperCap_Send(const SuperCap_Send_t *data);
 
 const Module_SuperCap_t *Module_SuperCap_Get(void);
+
+uint8_t Module_SuperCap_Get_offline_state(void);
 
 #endif // _MODULE_SUPERCAP_H_

@@ -16,10 +16,9 @@
 /* 内部变量 */
 BUFFER_SECTION static uint8_t sbus_rx_buf[64];  /* 接收缓冲区 */
 static UART_Device           *sbus_uart;        /* UART 设备 */
-static Offline_Device        *sbus_offline;     /* 离线设备 */
 static bool                   sbus_initialized; /* 初始化标志 */
 
-int8_t remote_sbus_init(void)
+int8_t remote_sbus_init(Offline_Device **out_offline)
 {
     REMOTE_UART.Init.BaudRate = 100000;
     if (HAL_UART_Init(&REMOTE_UART) != HAL_OK)
@@ -34,12 +33,13 @@ int8_t remote_sbus_init(void)
         .beep_times = 0,
         .enable     = 1,
     };
-    sbus_offline = Module_Offline_register(&offline_cfg);
-    if (sbus_offline == NULL)
+    Offline_Device *offline = Module_Offline_register(&offline_cfg);
+    if (offline == NULL)
     {
         LOG_E("offline register error");
         return -1;
     }
+    if (out_offline) *out_offline = offline;
 
     UART_Device_init_config uart_cfg = {
         .huart           = &REMOTE_UART,
@@ -61,7 +61,7 @@ int8_t remote_sbus_init(void)
     return 0;
 }
 
-void remote_sbus_decode(Remote_Data_t *data)
+void remote_sbus_decode(Remote_Data_t *data, Offline_Device *offline)
 {
     if (!sbus_initialized || !data) return;
 
@@ -115,13 +115,13 @@ void remote_sbus_decode(Remote_Data_t *data)
 
     if (buf[23] == 0x00)
     {
-        Module_Offline_device_update(sbus_offline);
+        if (offline) Module_Offline_device_update(offline);
     }
 }
 
 #else
 
-int8_t remote_sbus_init(void) { return -1; }
-void   remote_sbus_decode(Remote_Data_t *data) { (void)data; }
+int8_t remote_sbus_init(Offline_Device **out_offline) { (void)out_offline; return -1; }
+void   remote_sbus_decode(Remote_Data_t *data, Offline_Device *offline) { (void)data; (void)offline; }
 
 #endif

@@ -2,7 +2,7 @@
  * @Author: laladuduqq 2807523947@qq.com
  * @Date: 2026-05-11 15:49:51
  * @LastEditors: laladuduqq 2807523947@qq.com
- * @LastEditTime: 2026-05-11 16:23:03
+ * @LastEditTime: 2026-05-14 16:47:46
  * @FilePath: /mas_embedded_threadx/modules/REFEREE/module_referee.h
  * @Description:
  */
@@ -45,5 +45,7 @@ void Module_Referee_Send_Interaction(uint16_t sub_cmd_id, uint16_t sender_id, ui
  * @return uint8_t* 命令数据指针
  */
 uint8_t *Module_Referee_Get_cmd_data(uint16_t cmd_id);
+
+uint8_t Module_Referee_Get_offline_state(void);
 
 #endif // _MODULE_REFEREE_H_

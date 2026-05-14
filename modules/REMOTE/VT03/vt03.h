@@ -11,6 +11,7 @@
 
 #include "module_remote.h"
 #include <stdint.h>
+#include "module_offline.h"
 
 #define VT03_CH_VALUE_MIN    ((uint16_t)364)
 #define VT03_CH_VALUE_OFFSET ((uint16_t)1024)
@@ -18,14 +19,16 @@
 
 /**
  * @brief VT03 初始化
+ * @param out_offline 输出离线设备句柄指针，NULL 则不输出
  * @return 0 成功, -1 失败
  */
-int8_t remote_vt03_init(void);
+int8_t remote_vt03_init(Offline_Device **out_offline);
 
 /**
  * @brief VT03 单帧解码
  * @param data 统一遥控数据结构指针
+ * @param offline 离线设备句柄 (用于心跳上报)
  */
-void remote_vt03_decode(Remote_Data_t *data);
+void remote_vt03_decode(Remote_Data_t *data, Offline_Device *offline);
 
 #endif // _VT03_H_

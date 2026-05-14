@@ -84,4 +84,13 @@ void Module_BoardComm_Send(const uint8_t *data, uint8_t len)
     BSP_CAN_Send(boardcomm_dev, data, len);
 }
 
+uint8_t Module_BoardComm_Get_Offline_State(void)
+{
+    if (boardcomm_offline_dev == NULL)
+    {
+        return STATE_OFFLINE; // 如果离线设备未初始化，默认返回离线状态
+    }
+    return Module_Offline_get_device_status(boardcomm_offline_dev);
+}
+
 void Module_BoardComm_RegisterRx(BoardComm_RxCallback_t callback) { app_rx_callback = callback; }

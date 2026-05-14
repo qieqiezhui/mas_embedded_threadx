@@ -2,7 +2,7 @@
  * @Author: laladuduqq 2807523947@qq.com
  * @Date: 2026-01-27 19:55:26
  * @LastEditors: laladuduqq 2807523947@qq.com
- * @LastEditTime: 2026-05-11 16:47:52
+ * @LastEditTime: 2026-05-14 16:51:58
  * @FilePath: /mas_embedded_threadx/modules/WT606/module_wt606.h
  * @Description:
  */
@@ -45,5 +45,7 @@ typedef struct
 void Module_WT606_Init();
 
 const Module_WT606_Device_t *Module_WT606_Get();
+
+uint8_t Module_WT606_Get_offline_state(void);
 
 #endif // _MODULE_WT606_H_
