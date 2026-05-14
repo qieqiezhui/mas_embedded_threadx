@@ -1,0 +1,55 @@
+/*
+ * @Author: laladuduqq 2807523947@qq.com
+ * @Date: 2026-05-13 13:14:16
+ * @LastEditors: laladuduqq 2807523947@qq.com
+ * @LastEditTime: 2026-05-13 13:34:32
+ * @FilePath: /mas_embedded_threadx/modules/VISION/module_vision.h
+ * @Description:
+ */
+#ifndef _MODULE_VISION_H_
+#define _MODULE_VISION_H_
+
+#include <stdint.h>
+
+#pragma pack(1)
+
+/* 发送包: MCU → 上位机 */
+typedef struct
+{
+    uint8_t header; /* 帧头 0xAA */
+    uint8_t mode;   /* 模式 */
+    float   q[4];   /* 四元数 w,x,y,z */
+    uint8_t tail;   /* 帧尾 0x55 */
+} SendPacket;
+
+/* 接收包: 上位机 → MCU */
+typedef struct
+{
+    uint8_t header;       /* 帧头 0xBB */
+    uint8_t found;        /* 是否找到目标 */
+    uint8_t fire_advice;  /* 开火建议 */
+    float   target_yaw;   /* 目标偏航角 (rad) */
+    float   target_pitch; /* 目标俯仰角 (rad) */
+    uint8_t tail;         /* 帧尾 0x55 */
+} ReceivePacket;
+
+#pragma pack()
+
+/**
+ * @brief 初始化视觉模块
+ */
+void Module_Vision_Init(void);
+
+/**
+ * @brief 发送数据包到上位机
+ * @param packet  发送包指针
+ */
+void Module_Vision_Send(SendPacket *packet);
+
+/**
+ * @brief 接收上位机数据包 
+ * @return 有效包指针, 无新数据时返回 NULL
+ */
+ReceivePacket *Module_Vision_Receive(void);
+
+#endif // _MODULE_VISION_H_

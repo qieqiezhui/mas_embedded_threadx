@@ -2,7 +2,7 @@
  * @Author: laladuduqq 17503181697@163.com
  * @Date: 2026-04-13 18:08:51
  * @LastEditors: laladuduqq 2807523947@qq.com
- * @LastEditTime: 2026-05-04 10:14:47
+ * @LastEditTime: 2026-05-14 09:50:17
  * @FilePath: /mas_embedded_threadx/robot/robot_init.c
  * @Description:
  */
@@ -12,7 +12,9 @@
 #include "tx_api.h"
 #include "utils_init.h"
 #include "bsp_init.h"
+#include "module_init.h"
 #include "bsp_def.h"
+#include "app_init.h"
 
 #define LOG_LVL LOG_LVL_INFO
 #define LOG_TAG "Robot_Init"
@@ -31,9 +33,11 @@ void Robot_Init(void)
         {
         };
     }
-    
+
     UTILS_Init();
     BSP_Init();
+    MODULE_Init();
+    APP_Init();
 
     LOG_I("robot init finished");
 }

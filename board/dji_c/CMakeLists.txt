@@ -24,6 +24,14 @@ set(CMAKE_PROJECT_NAME base)
 # ThreadX configuration for Cortex-M4 / GCC
 set(THREADX_ARCH cortex_m4)
 
+# 加载配置（ROBOT/BOARD 在 apps/config.cmake 中定义）
+include(${CMAKE_SOURCE_DIR}/../../apps/config.cmake)
+
+# 生成头文件到 apps 目录
+set(_generated_dir ${CMAKE_CURRENT_BINARY_DIR}/generated)
+configure_file(${CMAKE_SOURCE_DIR}/../../apps/robot_def.h.in     ${_generated_dir}/robot_def.h)
+configure_file(${CMAKE_SOURCE_DIR}/../../apps/module_config.h.in ${_generated_dir}/module_config.h)
+
 # Enable compile command to ease indexing with e.g. clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
@@ -65,6 +73,8 @@ target_link_libraries(cherryusb PUBLIC stm32cubemx azrtos::threadx utils)
 add_subdirectory(../../utils ${CMAKE_CURRENT_BINARY_DIR}/utils)
 add_subdirectory(../../board/bsp ${CMAKE_CURRENT_BINARY_DIR}/bsp)
 add_subdirectory(../../robot ${CMAKE_CURRENT_BINARY_DIR}/robot)
+add_subdirectory(../../modules ${CMAKE_CURRENT_BINARY_DIR}/modules)
+add_subdirectory(../../apps ${CMAKE_CURRENT_BINARY_DIR}/apps)
 
 # CMSIS-DSP settings for Cortex-M4
 set(LOOPUNROLL ON CACHE BOOL "Loop unrolling for max performance" FORCE)
@@ -87,6 +97,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+    ${_generated_dir}
     # Add user defined include paths
 )
 
@@ -107,6 +118,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     robot
     CMSISDSP
     cherryusb
+    modules
+    app
     # Add user defined libraries
 )
 
