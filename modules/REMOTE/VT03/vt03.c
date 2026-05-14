@@ -111,10 +111,14 @@ void remote_vt03_decode(Remote_Data_t *data, Offline_Device *offline)
     /* 滚轮 */
     int16_t wheel = ((buf[8] >> 1) | (buf[9] << 7)) & 0x07FF;
     wheel -= VT03_CH_VALUE_OFFSET;
-    data->wheel = wheel;
+    data->vt03.wheel = wheel;
 
     /* 按键 */
-    data->switch_pos = (buf[7] >> 4) & 0x03;
+    data->vt03.switch_pos   = (buf[7] >> 4) & 0x03;
+    data->vt03.pause        = (buf[7] >> 6) & 0x01;
+    data->vt03.custom_left  = (buf[7] >> 7) & 0x01;
+    data->vt03.custom_right = (buf[8] >> 0) & 0x01;
+    data->vt03.trigger      = (buf[9] >> 4) & 0x01;
 
     /* 鼠标 */
     data->mouse.mouse_x = (int16_t)(buf[10] | (buf[11] << 8));
@@ -136,7 +140,15 @@ void remote_vt03_decode(Remote_Data_t *data, Offline_Device *offline)
 
 #else
 
-int8_t remote_vt03_init(Offline_Device **out_offline) { (void)out_offline; return -1; }
-void   remote_vt03_decode(Remote_Data_t *data, Offline_Device *offline) { (void)data; (void)offline; }
+int8_t remote_vt03_init(Offline_Device **out_offline)
+{
+    (void)out_offline;
+    return -1;
+}
+void remote_vt03_decode(Remote_Data_t *data, Offline_Device *offline)
+{
+    (void)data;
+    (void)offline;
+}
 
 #endif

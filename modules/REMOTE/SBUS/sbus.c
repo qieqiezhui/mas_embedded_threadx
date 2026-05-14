@@ -121,7 +121,15 @@ void remote_sbus_decode(Remote_Data_t *data, Offline_Device *offline)
 
 #else
 
-int8_t remote_sbus_init(Offline_Device **out_offline) { (void)out_offline; return -1; }
-void   remote_sbus_decode(Remote_Data_t *data, Offline_Device *offline) { (void)data; (void)offline; }
+int8_t remote_sbus_init(Offline_Device **out_offline)
+{
+    (void)out_offline;
+    return -1;
+}
+void remote_sbus_decode(Remote_Data_t *data, Offline_Device *offline)
+{
+    (void)data;
+    (void)offline;
+}
 
 #endif

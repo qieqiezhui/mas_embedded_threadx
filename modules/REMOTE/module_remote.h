@@ -2,7 +2,7 @@
  * @Author: laladuduqq 2807523947@qq.com
  * @Date: 2026-05-10 17:40:19
  * @LastEditors: laladuduqq 2807523947@qq.com
- * @LastEditTime: 2026-05-14 19:41:27
+ * @LastEditTime: 2026-05-14 20:12:05
  * @FilePath: /mas_embedded_threadx/modules/REMOTE/module_remote.h
  * @Description:
  */
@@ -38,6 +38,22 @@
 #ifndef REMOTE_TASK_VT_PRIORITY
 #define REMOTE_TASK_VT_PRIORITY 8 /* 图传任务优先级 */
 #endif
+
+/* SBUS 通道值定义 */
+#define SBUS_CHX_BIAS        ((uint16_t)1024)
+#define SBUS_CHX_UP          ((uint16_t)240)
+#define SBUS_CHX_DOWN        ((uint16_t)1807)
+/* DT7 通道值定义 */
+#define DT7_CH_VALUE_MIN     ((uint16_t)364)
+#define DT7_CH_VALUE_OFFSET  ((uint16_t)1024)
+#define DT7_CH_VALUE_MAX     ((uint16_t)1684)
+#define DT7_SW_UP            ((uint16_t)1)
+#define DT7_SW_MID           ((uint16_t)3)
+#define DT7_SW_DOWN          ((uint16_t)2)
+/* VT03 通道值定义 */
+#define VT03_CH_VALUE_MIN    ((uint16_t)364)
+#define VT03_CH_VALUE_OFFSET ((uint16_t)1024)
+#define VT03_CH_VALUE_MAX    ((uint16_t)1684)
 
 /* 统一的按键类型定义 */
 typedef enum
@@ -96,17 +112,32 @@ typedef struct
     uint8_t mouse_m;
 } mouse_state_t;
 
+typedef struct
+{
+    int16_t wheel; /* 滚轮 */
+    uint8_t sw1;   /* 拨杆1 */
+    uint8_t sw2;   /* 拨杆2 */
+} dt7_custom_t;
+
+typedef struct
+{
+    int16_t wheel;
+    uint8_t switch_pos;
+    uint8_t pause;
+    uint8_t custom_left;
+    uint8_t custom_right;
+    uint8_t trigger;
+} vt03_custom_t;
+
 /**
  * @brief 统一遥控数据
  */
 typedef struct
 {
     /* 摇杆/通道数据 */
-    int16_t channels[16]; /* ch[0..3]: 摇杆通道, ch[4..15]: 扩展通道 (SBUS) */
-    int16_t wheel;        /* 滚轮 (DT7 / VT03) */
-    uint8_t sw1;          /* 拨杆1 (DT7) */
-    uint8_t sw2;          /* 拨杆2 (DT7) */
-    uint8_t switch_pos;   /* 拨杆位置 (VT03) */
+    int16_t       channels[16]; /* ch[0..3]: 摇杆通道, ch[4..15]: 扩展通道 (SBUS) */
+    dt7_custom_t  dt7;          /* DT7 自定义数据 */
+    vt03_custom_t vt03;         /* VT03 自定义数据 */
 
     /* 键鼠数据 */
     mouse_state_t    mouse;    /* 鼠标状态 */
@@ -144,10 +175,16 @@ mouse_state_t *Module_Remote_get_mouse(void);
 keyboard_state_t *Module_Remote_get_keyboard(void);
 
 /**
- * @brief 获取滚轮值
- * @return 滚轮值
+ * @brief 获取 DT7 自定义数据指针
+ * @return DT7 自定义数据指针, 未初始化返回 NULL
  */
-int16_t Module_Remote_get_wheel(void);
+dt7_custom_t *Module_Remote_get_dt7_custom(void);
+
+/**
+ * @brief 获取 VT03 自定义数据指针
+ * @return VT03 自定义数据指针, 未初始化返回 NULL
+ */
+vt03_custom_t *Module_Remote_get_vt03_custom(void);
 
 /**
  * @brief 获取遥控器与图传联合离线状态

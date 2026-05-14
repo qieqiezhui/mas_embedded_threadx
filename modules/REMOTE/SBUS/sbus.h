@@ -2,7 +2,7 @@
  * @Author: laladuduqq 2807523947@qq.com
  * @Date: 2026-05-10 17:32:15
  * @LastEditors: laladuduqq 2807523947@qq.com
- * @LastEditTime: 2026-05-10 18:20:52
+ * @LastEditTime: 2026-05-14 20:11:53
  * @FilePath: /mas_embedded_threadx/modules/REMOTE/SBUS/sbus.h
  * @Description:
  */
@@ -12,10 +12,6 @@
 #include "module_remote.h"
 #include <stdint.h>
 #include "module_offline.h"
-
-#define SBUS_CHX_BIAS ((uint16_t)1024)
-#define SBUS_CHX_UP   ((uint16_t)240)
-#define SBUS_CHX_DOWN ((uint16_t)1807)
 
 /**
  * @brief SBUS 初始化 (配置 UART + 注册 offline)

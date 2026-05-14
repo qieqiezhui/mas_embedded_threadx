@@ -93,8 +93,8 @@ void remote_dt7_decode(Remote_Data_t *data, Offline_Device *offline)
     if (abs(data->channels[3]) <= REMOTE_DEAD_ZONE) data->channels[3] = 0;
 
     /* 拨杆 */
-    data->sw1 = ((buf[5] >> 4) & 0x000C) >> 2;
-    data->sw2 = (buf[5] >> 4) & 0x0003;
+    data->dt7.sw1 = ((buf[5] >> 4) & 0x000C) >> 2;
+    data->dt7.sw2 = (buf[5] >> 4) & 0x0003;
 
 #if (REMOTE_VT_SOURCE == 0)
     /* 鼠标 — 仅在无外部图传时使用 DT7 自带键鼠 */
@@ -115,14 +115,22 @@ void remote_dt7_decode(Remote_Data_t *data, Offline_Device *offline)
     /* 滚轮 */
     int16_t wheel = (buf[16] | buf[17] << 8) - DT7_CH_VALUE_OFFSET;
     if (abs(wheel) <= REMOTE_DEAD_ZONE * 10) wheel = 0;
-    data->wheel = wheel;
+    data->dt7.wheel = wheel;
 
     if (offline) Module_Offline_device_update(offline);
 }
 
 #else
 
-int8_t remote_dt7_init(Offline_Device **out_offline) { (void)out_offline; return -1; }
-void   remote_dt7_decode(Remote_Data_t *data, Offline_Device *offline) { (void)data; (void)offline; }
+int8_t remote_dt7_init(Offline_Device **out_offline)
+{
+    (void)out_offline;
+    return -1;
+}
+void remote_dt7_decode(Remote_Data_t *data, Offline_Device *offline)
+{
+    (void)data;
+    (void)offline;
+}
 
 #endif

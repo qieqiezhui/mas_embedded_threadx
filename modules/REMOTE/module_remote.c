@@ -146,10 +146,16 @@ keyboard_state_t *Module_Remote_get_keyboard(void)
     return &g_remote_data.keyboard;
 }
 
-int16_t Module_Remote_get_wheel(void)
+dt7_custom_t *Module_Remote_get_dt7_custom(void)
 {
-    if (!g_initialized) return 0;
-    return g_remote_data.wheel;
+    if (!g_initialized) return NULL;
+    return &g_remote_data.dt7;
+}
+
+vt03_custom_t *Module_Remote_get_vt03_custom(void)
+{
+    if (!g_initialized) return NULL;
+    return &g_remote_data.vt03;
 }
 
 uint8_t Module_Remote_get_offline_status(void)

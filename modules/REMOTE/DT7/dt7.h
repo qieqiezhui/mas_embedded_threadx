@@ -2,7 +2,7 @@
  * @Author: laladuduqq 2807523947@qq.com
  * @Date: 2026-05-10 17:32:15
  * @LastEditors: laladuduqq 2807523947@qq.com
- * @LastEditTime: 2026-05-10 18:21:02
+ * @LastEditTime: 2026-05-14 20:12:19
  * @FilePath: /mas_embedded_threadx/modules/REMOTE/DT7/dt7.h
  * @Description:
  */
@@ -12,14 +12,6 @@
 #include "module_remote.h"
 #include <stdint.h>
 #include "module_offline.h"
-
-#define DT7_CH_VALUE_MIN    ((uint16_t)364)
-#define DT7_CH_VALUE_OFFSET ((uint16_t)1024)
-#define DT7_CH_VALUE_MAX    ((uint16_t)1684)
-
-#define DT7_SW_UP           ((uint16_t)1)
-#define DT7_SW_MID          ((uint16_t)3)
-#define DT7_SW_DOWN         ((uint16_t)2)
 
 /**
  * @brief DT7 初始化 (配置 UART + 注册 offline)

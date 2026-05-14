@@ -2,7 +2,7 @@
  * @Author: laladuduqq 2807523947@qq.com
  * @Date: 2026-05-10 17:32:15
  * @LastEditors: laladuduqq 2807523947@qq.com
- * @LastEditTime: 2026-05-10 18:20:04
+ * @LastEditTime: 2026-05-14 20:12:34
  * @FilePath: /mas_embedded_threadx/modules/REMOTE/VT03/vt03.h
  * @Description:
  */
@@ -13,9 +13,7 @@
 #include <stdint.h>
 #include "module_offline.h"
 
-#define VT03_CH_VALUE_MIN    ((uint16_t)364)
-#define VT03_CH_VALUE_OFFSET ((uint16_t)1024)
-#define VT03_CH_VALUE_MAX    ((uint16_t)1684)
+
 
 /**
  * @brief VT03 初始化
