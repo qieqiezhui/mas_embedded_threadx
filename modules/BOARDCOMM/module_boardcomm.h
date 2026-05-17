@@ -48,6 +48,14 @@ void Module_BoardComm_Send(const uint8_t *data, uint8_t len);
 void Module_BoardComm_RegisterRx(BoardComm_RxCallback_t callback);
 
 /**
+ * @brief 直接注册接收缓冲区（BOARDCOMM 内部 memcpy）
+ * @param buffer       目标缓冲区指针
+ * @param expected_len 期望的数据长度（与 CAN 帧长度匹配时才拷贝）
+ * @note 与 RegisterRx 互斥，重复调用会覆盖；传 NULL 注销
+ */
+void Module_BoardComm_RegisterRxBuffer(void *buffer, uint8_t expected_len);
+
+/**
  * @brief 获取板间通信离线状态
  * @return 0 表示在线，1 表示离线
  */
