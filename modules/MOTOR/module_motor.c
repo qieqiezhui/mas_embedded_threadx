@@ -14,17 +14,15 @@ static void motor_task_entry(ULONG thread_input)
 {
     while (1)
     {
-        Motor_UpdateAll();     
-        PowerControl_Update(); 
-        Motor_DJI_Flush();     
+        Motor_UpdateAll();
+        PowerControl_Update();
+        Motor_DJI_Flush();
         tx_thread_sleep(2);
     }
 }
 
 void Module_Motor_Init(void)
 {
-    Motor_BaseInit();
-
     UINT ret = tx_thread_create(&motor_thread, "motor", motor_task_entry, 0, motor_thread_stack, MOTOR_TASK_STACK_SIZE, MOTOR_TASK_PRIORITY,
                                 MOTOR_TASK_PRIORITY, TX_NO_TIME_SLICE, TX_AUTO_START);
     if (ret != TX_SUCCESS)

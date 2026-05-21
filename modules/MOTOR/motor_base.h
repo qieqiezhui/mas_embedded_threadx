@@ -7,7 +7,6 @@
 #ifndef _MOTOR_BASE_H_
 #define _MOTOR_BASE_H_
 
-#include "list.h"
 #include "module_offline.h"
 #include "motor_def.h"
 #include <stdint.h>
@@ -16,7 +15,7 @@ typedef struct Motor_Base Motor_Base;
 
 struct Motor_Base
 {
-    list_node_t       node;
+    Motor_Base       *next;
     Motor_Type_e      type;
     Motor_Transport_e transport;
 
@@ -32,11 +31,6 @@ struct Motor_Base
 };
 
 #define MOTOR_GET_DERIVED(base_ptr, derived_type) ((derived_type *)(base_ptr))
-
-/**
- * @brief 初始化电机基础数据结构
- */
-void Motor_BaseInit(void);
 
 /**
  * @brief 注册电机

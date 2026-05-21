@@ -19,7 +19,7 @@
 
 ```
 Motor_Base (基类)                   ← motor_base.h
-  ├── list_node_t  node             ← 链表节点
+  ├── Motor_Base  *next             ← 指向下一个电机
   ├── Motor_Type_e type             ← 电机型号
   ├── Motor_Transport_e transport   ← CAN / UART / PWM
   ├── Motor_Info_s       info       ← 物理参数
@@ -313,3 +313,4 @@ void Module_Motor_Init(void);
 |------|------|------|
 | v1.0 | 2026-05-11 | 初始版本 |
 | v1.1 | 2026-05-15 | 将内部指针改为const，增加前馈力矩补偿，fix：掉线失能问题 |
+| v1.2 | 2026-05-21 | 使用单向链表，方便调试 |

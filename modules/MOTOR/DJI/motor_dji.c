@@ -1,6 +1,5 @@
 #include "motor_dji.h"
 #include "bsp_can.h"
-#include "bsp_can_internal.h"
 #include "bsp_def.h"
 #include "module_offline.h"
 #include "user_lib.h"

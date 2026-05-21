@@ -1,28 +1,18 @@
 #include "motor_base.h"
 
-#define LOG_TAG "MotorBase"
-#define LOG_LVL LOG_LVL_INFO
-#include "ulog_def.h"
-
-static list_head_t g_motor_list;
-
-static int update_callback(Motor_Base *motor, void *arg)
-{
-    (void)arg;
-    if (motor->ControlAndSend) motor->ControlAndSend(motor);
-    return 0;
-}
-
-void Motor_BaseInit(void)
-{
-    list_init(&g_motor_list);
-    LOG_I("Motor base initialized");
-}
+static Motor_Base *g_motor_list = NULL;
 
 void Motor_Register(Motor_Base *motor)
 {
     if (motor == NULL) return;
-    list_add(&g_motor_list, &motor->node);
+    motor->next = g_motor_list;
+    g_motor_list = motor;
 }
 
-void Motor_UpdateAll(void) { list_foreach_entry(&g_motor_list, Motor_Base, node, update_callback, NULL); }
+void Motor_UpdateAll(void)
+{
+    for (Motor_Base *motor = g_motor_list; motor; motor = motor->next)
+    {
+        if (motor->ControlAndSend) motor->ControlAndSend(motor);
+    }
+}

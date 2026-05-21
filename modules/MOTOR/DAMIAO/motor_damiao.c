@@ -1,6 +1,5 @@
 #include "motor_damiao.h"
 #include "bsp_can.h"
-#include "bsp_can_internal.h"
 #include "bsp_dwt.h"
 #include "bsp_def.h"
 #include "module_offline.h"
