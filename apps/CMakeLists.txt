@@ -27,8 +27,6 @@ if(EXISTS ${_robot_board_dir})
 endif()
 
 message(STATUS "APP robot dir:  ${_robot_board_dir}")
-message(STATUS "APP sources:    ${_robot_sources}")
-message(STATUS "APP includes:   ${_robot_includes}")
 
 add_library(app OBJECT
     app_init.c
