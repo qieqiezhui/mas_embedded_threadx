@@ -1,16 +1,21 @@
 #include "module_referee.h"
 #include "bsp_def.h"
+#include "bsp_dwt.h"
 #include "module_offline.h"
 #include "crc_rm.h"
 #include <string.h>
 #include "bsp_uart.h"
 #include "module_offline.h"
 #include "referee_protocol.h"
+#include "robot_def.h"
 #include "usart.h"
 
 #define LOG_TAG "module_referee"
 #define LOG_LVL LOG_LVL_INFO
 #include "ulog_def.h"
+
+/* 交互数据发送间隔：官方要求 ≤30Hz，这里限制到 10Hz（100ms = 100,000us） */
+#define INTERACTION_SEND_INTERVAL_US 100000ULL
 
 // 裁判系统模块结构体
 typedef struct
@@ -31,6 +36,9 @@ typedef struct
 
     // 帧序号（发送用，协议帧头 seq 为 1 字节）
     uint8_t tx_seq;
+
+    // 交互数据发送频率控制（10Hz，记录上次发送的 us 时间戳）
+    uint64_t last_interaction_us;
 } Module_Referee_s;
 
 static Module_Referee_s           module_referee;
@@ -172,10 +180,61 @@ void Module_Referee_Init()
     LOG_I("module referee initialized");
 }
 
-void Module_Referee_Send_Interaction(uint16_t sub_cmd_id, uint16_t sender_id, uint16_t recv_id, const void *payload, uint16_t payload_len,
-                                     uint32_t timeout)
+/* 根据 robot_id 获取自身 client ID */
+static uint16_t get_sender_client_id(void)
+{
+    uint8_t robot_id = module_referee.robot_status.robot_id;
+
+    /* robot_id == 0 表示尚未收到裁判系统数据 */
+    if (robot_id == 0) return 0;
+
+    switch (robot_id)
+    {
+    case ROBOT_ID_RED_HERO:
+        return CLIENT_ID_RED_HERO;
+    case ROBOT_ID_RED_ENGINEER:
+        return CLIENT_ID_RED_ENGINEER;
+    case ROBOT_ID_RED_INFANTRY_3:
+        return CLIENT_ID_RED_INFANTRY_3;
+    case ROBOT_ID_RED_INFANTRY_4:
+        return CLIENT_ID_RED_INFANTRY_4;
+    case ROBOT_ID_RED_INFANTRY_5:
+        return CLIENT_ID_RED_INFANTRY_5;
+    case ROBOT_ID_RED_AIR:
+        return CLIENT_ID_RED_AIR;
+    case ROBOT_ID_BLUE_HERO:
+        return CLIENT_ID_BLUE_HERO;
+    case ROBOT_ID_BLUE_ENGINEER:
+        return CLIENT_ID_BLUE_ENGINEER;
+    case ROBOT_ID_BLUE_INFANTRY_3:
+        return CLIENT_ID_BLUE_INFANTRY_3;
+    case ROBOT_ID_BLUE_INFANTRY_4:
+        return CLIENT_ID_BLUE_INFANTRY_4;
+    case ROBOT_ID_BLUE_INFANTRY_5:
+        return CLIENT_ID_BLUE_INFANTRY_5;
+    case ROBOT_ID_BLUE_AIR:
+        return CLIENT_ID_BLUE_AIR;
+    default:
+        return SERVER_ID; /* sentry/dart/radar/outpost/base 无 client ID */
+    }
+}
+
+void Module_Referee_Send_Interaction(uint16_t sub_cmd_id, const void *payload, uint16_t payload_len, uint32_t timeout)
 {
     if (module_referee.initialized == 0 || payload == NULL || payload_len == 0 || payload_len > 112u) return;
+
+    /* 发送频率限制（10Hz）：未达到发送间隔则直接返回 */
+    {
+        uint64_t now_us  = BSP_DWT_GetTimeline_us();
+        uint64_t elapsed = now_us - module_referee.last_interaction_us;
+        if (elapsed < INTERACTION_SEND_INTERVAL_US) return;
+        module_referee.last_interaction_us = now_us;
+    }
+
+    /* 自动确定 sender / recv */
+    uint16_t sender_id = module_referee.robot_status.robot_id;
+    if (sender_id == 0) return; /* 尚未收到 robot_id */
+    uint16_t recv_id = get_sender_client_id();
 
     // 交互数据段长度 = 6字节头（sub_cmd_id+sender+recv）+ payload
     const uint16_t data_len = 6u + payload_len;

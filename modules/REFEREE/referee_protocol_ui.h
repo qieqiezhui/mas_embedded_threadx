@@ -2,7 +2,7 @@
  * @Author: laladuduqq 17503181697@163.com
  * @Date: 2026-03-12 15:37:27
  * @LastEditors: laladuduqq 2807523947@qq.com
- * @LastEditTime: 2026-05-11 15:51:38
+ * @LastEditTime: 2026-05-23 12:19:02
  * @FilePath: /mas_embedded_threadx/modules/REFEREE/referee_protocol_ui.h
  * @Description: RoboMaster 2026 V1.2.0 UI绘制协议封装
  */
@@ -277,35 +277,34 @@ void ui_delete_layer(ui_delete_layer_t *del, uint8_t delete_type, uint8_t layer)
 
 /**
  * @brief 打包并发送单个图形（子内容ID 0x0101）
- * @param sender_id  发送者机器人ID
- * @param recv_id    接收者（选手端）ID
- * @param fig        图形数据
+ * @param fig   图形结构体
+ * @param timeout 超时时间
  */
-void ui_send_figure_1(uint16_t sender_id, uint16_t recv_id, const ui_figure_t *fig);
+void ui_send_figure_1(const ui_figure_t *fig, uint32_t timeout);
 
 /**
  * @brief 打包并发送2个图形（子内容ID 0x0102）
  */
-void ui_send_figure_2(uint16_t sender_id, uint16_t recv_id, const ui_figure_2_t *figs);
+void ui_send_figure_2(const ui_figure_2_t *figs, uint32_t timeout);
 
 /**
  * @brief 打包并发送5个图形（子内容ID 0x0103）
  */
-void ui_send_figure_5(uint16_t sender_id, uint16_t recv_id, const ui_figure_5_t *figs);
+void ui_send_figure_5(const ui_figure_5_t *figs, uint32_t timeout);
 
 /**
  * @brief 打包并发送7个图形（子内容ID 0x0104）
  */
-void ui_send_figure_7(uint16_t sender_id, uint16_t recv_id, const ui_figure_7_t *figs);
+void ui_send_figure_7(const ui_figure_7_t *figs, uint32_t timeout);
 
 /**
  * @brief 打包并发送字符串图形（子内容ID 0x0110）
  */
-void ui_send_string(uint16_t sender_id, uint16_t recv_id, const ui_string_t *str_fig);
+void ui_send_string(const ui_string_t *str_fig, uint32_t timeout);
 
 /**
  * @brief 打包并发送删除图层指令（子内容ID 0x0100）
  */
-void ui_send_delete_layer(uint16_t sender_id, uint16_t recv_id, const ui_delete_layer_t *del);
+void ui_send_delete_layer(const ui_delete_layer_t *del, uint32_t timeout);
 
 #endif // _REFEREE_PROTOCOL_UI_H_

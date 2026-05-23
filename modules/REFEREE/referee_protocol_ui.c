@@ -1,14 +1,7 @@
 #include "referee_protocol_ui.h"
 #include "module_referee.h"
-#include <string.h>
 #include "tx_api.h"
-
-// 打包并发送 0x0301 交互帧
-static void pack_ui_frame(uint16_t sender_id, uint16_t recv_id, uint16_t sub_cmd_id, const void *payload, uint16_t payload_len)
-{
-    Module_Referee_Send_Interaction(sub_cmd_id, sender_id, recv_id, payload, payload_len, TX_WAIT_FOREVER);
-    tx_thread_sleep(120);
-}
+#include <string.h>
 
 // 填充 figure_name + cfg1/cfg2 通用字段
 static void fig_base(ui_figure_t *fig, const char name[3], uint8_t op, uint8_t type, uint8_t layer, uint8_t color, uint16_t width, uint16_t sx,
@@ -148,32 +141,29 @@ void ui_figure_set_int_value(ui_figure_t *fig, int32_t value)
     fig->cfg3.details_e = (uv >> 21) & 0x7FFu;
 }
 
-void ui_send_figure_1(uint16_t sender_id, uint16_t recv_id, const ui_figure_t *fig)
+void ui_send_figure_1(const ui_figure_t *fig, uint32_t timeout) { Module_Referee_Send_Interaction(UI_CMD_DRAW_1, fig, sizeof(ui_figure_t), timeout); }
+
+void ui_send_figure_2(const ui_figure_2_t *figs, uint32_t timeout)
 {
-    pack_ui_frame(sender_id, recv_id, UI_CMD_DRAW_1, fig, sizeof(ui_figure_t));
+    Module_Referee_Send_Interaction(UI_CMD_DRAW_2, figs, sizeof(ui_figure_2_t), timeout);
 }
 
-void ui_send_figure_2(uint16_t sender_id, uint16_t recv_id, const ui_figure_2_t *figs)
+void ui_send_figure_5(const ui_figure_5_t *figs, uint32_t timeout)
 {
-    pack_ui_frame(sender_id, recv_id, UI_CMD_DRAW_2, figs, sizeof(ui_figure_2_t));
+    Module_Referee_Send_Interaction(UI_CMD_DRAW_5, figs, sizeof(ui_figure_5_t), timeout);
 }
 
-void ui_send_figure_5(uint16_t sender_id, uint16_t recv_id, const ui_figure_5_t *figs)
+void ui_send_figure_7(const ui_figure_7_t *figs, uint32_t timeout)
 {
-    pack_ui_frame(sender_id, recv_id, UI_CMD_DRAW_5, figs, sizeof(ui_figure_5_t));
+    Module_Referee_Send_Interaction(UI_CMD_DRAW_7, figs, sizeof(ui_figure_7_t), timeout);
 }
 
-void ui_send_figure_7(uint16_t sender_id, uint16_t recv_id, const ui_figure_7_t *figs)
+void ui_send_string(const ui_string_t *str_fig, uint32_t timeout)
 {
-    pack_ui_frame(sender_id, recv_id, UI_CMD_DRAW_7, figs, sizeof(ui_figure_7_t));
+    Module_Referee_Send_Interaction(UI_CMD_DRAW_STRING, str_fig, sizeof(ui_string_t), timeout);
 }
 
-void ui_send_string(uint16_t sender_id, uint16_t recv_id, const ui_string_t *str_fig)
+void ui_send_delete_layer(const ui_delete_layer_t *del, uint32_t timeout)
 {
-    pack_ui_frame(sender_id, recv_id, UI_CMD_DRAW_STRING, str_fig, sizeof(ui_string_t));
-}
-
-void ui_send_delete_layer(uint16_t sender_id, uint16_t recv_id, const ui_delete_layer_t *del)
-{
-    pack_ui_frame(sender_id, recv_id, UI_CMD_DEL_LAYER, del, sizeof(ui_delete_layer_t));
+    Module_Referee_Send_Interaction(UI_CMD_DEL_LAYER, del, sizeof(ui_delete_layer_t), timeout);
 }
