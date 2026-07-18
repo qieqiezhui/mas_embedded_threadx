@@ -58,7 +58,7 @@ void chassis_init(void)
         return;
     }
     chassis_motor_config.transport_config.can.tx_id             = 3;
-    chassis_motor_config.setting_init_config.motor_reverse_flag = 0;
+    chassis_motor_config.setting_init_config.motor_reverse_flag = 1;
     chassis_motor_config.offline_init_config.name               = "m3508_3";
     chassis_motor_config.offline_init_config.beep_times         = 3;
     chassis_motors[2]                                           = Motor_DJI_Init(&chassis_motor_config);
@@ -68,7 +68,7 @@ void chassis_init(void)
         return;
     }
     chassis_motor_config.transport_config.can.tx_id             = 4;
-    chassis_motor_config.setting_init_config.motor_reverse_flag = 0;
+    chassis_motor_config.setting_init_config.motor_reverse_flag = 1;
     chassis_motor_config.offline_init_config.name               = "m3508_4";
     chassis_motor_config.offline_init_config.beep_times         = 4;
     chassis_motors[3]                                           = Motor_DJI_Init(&chassis_motor_config);
@@ -121,7 +121,7 @@ void chassis_task(Chassis_Ctrl_Cmd_t *chassis_cmd)
             chassis_vx                   = chassis_cmd->vx * cos_theta - chassis_cmd->vy * sin_theta;
             chassis_vy                   = chassis_cmd->vx * sin_theta + chassis_cmd->vy * cos_theta;
 
-            Chassis_Mecanum_Calc(chassis_motors, &chassis_diff_config, chassis_vx, chassis_vy, chassis_wz);
+            Chassis_Mecanum_Calc(chassis_motors, &chassis_diff_config, -chassis_vx, -chassis_vy, chassis_wz);
 
 
                 
