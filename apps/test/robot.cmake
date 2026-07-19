@@ -3,7 +3,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/../../modules/module_config.cmake)
 
 # 模块开关（按板型覆盖默认值）
-set(MODULES_SINGLE   BMI088 OFFLINE REMOTE MOTOR INS )
+set(MODULES_SINGLE   BMI088 OFFLINE REMOTE MOTOR INS CHASSIS_TYPE)
 
 
 # OFFLINE 参数

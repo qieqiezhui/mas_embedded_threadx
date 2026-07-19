@@ -44,11 +44,9 @@ void remote_control(Chassis_Ctrl_Cmd_t *Chassis_Ctrl, Shoot_Ctrl_Cmd_t *Shoot_Ct
             
         }
 
-        Chassis_Ctrl->vx = (float)Module_Remote_get_channel(2) / (float)(SBUS_CHX_DOWN - SBUS_CHX_BIAS);
-            Chassis_Ctrl->vy = (float)Module_Remote_get_channel(1) / (float)(SBUS_CHX_DOWN - SBUS_CHX_BIAS);
-            temp[0] = (float)Module_Remote_get_channel(1);
-            temp[1] = (float)Module_Remote_get_channel(2);
-            
+         Chassis_Ctrl->vx = (float)Module_Remote_get_channel(3) / (float)(1807 - 1024);
+        Chassis_Ctrl->vy = -(float)Module_Remote_get_channel(4) / (float)(1807 - 1024);
+
 
         }
         if(Shoot_Ctrl)
@@ -65,11 +63,10 @@ void remote_control(Chassis_Ctrl_Cmd_t *Chassis_Ctrl, Shoot_Ctrl_Cmd_t *Shoot_Ct
             if(ch5 == SBUS_CHX_UP)
             {
                 Gimbal_Ctrl->gimbal_mode = gimbal_genius_mode;
-                Gimbal_Ctrl->yaw -= 0.001f * (float)Module_Remote_get_channel(4);
-                Gimbal_Ctrl->pitch += 0.001f * (float)Module_Remote_get_channel(3);
+                 Gimbal_Ctrl->yaw -= 0.001f * (float)Module_Remote_get_channel(1);
+                 Gimbal_Ctrl->pitch += 0.001f * (float)Module_Remote_get_channel(2);
                 VAL_LIMIT(Gimbal_Ctrl->pitch, PITCH_MIN_ANGLE, PITCH_MAX_ANGLE);
-                temp[2] = (float)Module_Remote_get_channel(3);
-                temp[3] = (float)Module_Remote_get_channel(4);
+                
             }
             else if(ch5 == SBUS_CHX_BIAS)
             {
