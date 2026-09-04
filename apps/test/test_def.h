@@ -17,7 +17,7 @@
 
 
 #define GRAVITY_GAMMA 0.065f                              // 重力前馈补偿项
-#define GRAVITY_K_PITCH -0.055f                           // pitch轴重力前馈系数
+#define GRAVITY_K_PITCH 0.085f                           // pitch轴重力前馈系数
 
 // clang-format on
 

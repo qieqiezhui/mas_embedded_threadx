@@ -110,38 +110,38 @@ void shoot_task(Shoot_Ctrl_Cmd_t *shoot_cmd)
         {
             if (shoot_cmd->friction_mode == friction_on)
             {
-                Motor_DJI_Start(friction_l);
-                Motor_DJI_Start(friction_r);
+                Motor_Start((Motor_Base*)friction_l);
+                Motor_Start((Motor_Base*)friction_r);
                 // 确定是否开启摩擦轮
                     // 根据收到的弹速设置设定摩擦轮电机参考值,需实测后填入
-                    Motor_DJI_SetRef(friction_l, -6800 * RPM_2_RAD_PER_SEC);
-                    Motor_DJI_SetRef(friction_r, 6800 * RPM_2_RAD_PER_SEC);
+                    Motor_SetRef((Motor_Base*)friction_l, -6800 * RPM_2_RAD_PER_SEC);
+                    Motor_SetRef((Motor_Base*)friction_r, 6800 * RPM_2_RAD_PER_SEC);
             }
             else // 关闭摩擦轮
             {
-                    Motor_DJI_SetRef(friction_l, 0);
-                    Motor_DJI_SetRef(friction_r, 0);
-                    Motor_DJI_SetRef(loader, 0);
+                    Motor_SetRef((Motor_Base*)friction_l, 0);
+                    Motor_SetRef((Motor_Base*)friction_r, 0);
+                    Motor_SetRef((Motor_Base*)loader, 0);
             }
 
             if (shoot_cmd->load_mode == load_on)
             {
-                Motor_DJI_Start(loader);
+                Motor_Start((Motor_Base*)loader);
                 // 根据收到的弹速设置设定摩擦轮电机参考值,需实测后填入
-                Motor_DJI_SetRef(loader, 6800 * RPM_2_RAD_PER_SEC);
+                Motor_SetRef((Motor_Base*)loader, 6800 * RPM_2_RAD_PER_SEC);
             }
             else // 关闭拨盘
             {
-                Motor_DJI_SetRef(loader, 0);
+                Motor_SetRef((Motor_Base*)loader, 0);
             }
             
             
         }
         else
         {
-            Motor_DJI_Stop(friction_l);
-            Motor_DJI_Stop(friction_r);
-            Motor_DJI_Stop(loader);
+            Motor_Stop((Motor_Base*)friction_l);
+            Motor_Stop((Motor_Base*)friction_r);
+            Motor_Stop((Motor_Base*)loader);
         }
     }
 }
