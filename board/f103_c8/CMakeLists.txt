@@ -8,6 +8,8 @@ project(base)
 set(THREADX_ARCH cortex_m3)
 # F103C8 无 USB OTG 硬件，关闭 BSP USB 外设，DWC2 端口自动联动关闭
 set(BSP_USB_ENABLE OFF)
+# 灯带已改 GPIO 位带方案(不用 BSP SPI); SPI2 已从 CubeMX 移除(spi.h 不存在), 故关闭 BSP SPI 以免编译 bsp_spi.c 找不到 spi.h
+set(BSP_SPI_ENABLE OFF)
 # 公共构建逻辑
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/board_common.cmake)
 

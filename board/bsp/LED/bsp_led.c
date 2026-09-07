@@ -6,6 +6,7 @@
 
 #if defined(STM32H723xx)
 
+
 #include "bsp_spi.h"
 #include "spi.h"
 #include "tx_api.h"
