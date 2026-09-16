@@ -1,19 +1,11 @@
-# 先加载默认模板，再覆盖差异
+# test 兵种 — 新模块接入测试骨架
+# 用途: 新模块开发时在此单独验证 (见 robot_control.c 顶部工作流说明)
+# 最小模块集: OFFLINE (测具体模块时, 把对应模块加入 MODULES_SINGLE)
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../modules/module_config.cmake)
 
-# 模块开关（按板型覆盖默认值）
-set(MODULES_SINGLE   BMI088 OFFLINE MOTOR INS CHASSIS_TYPE REMOTE)
-
+# 模块开关(按板型覆盖默认值)
+set(MODULES_SINGLE   OFFLINE)
 
 # OFFLINE 参数
-set(OFFLINE_BEEP_ENABLE     0)    # 开启蜂鸣器
-
-# REMOTE 参数
-set(REMOTE_UART             huart3) # 串口
-set(REMOTE_VT_UART          huart6) # 图传串口
-set(REMOTE_SOURCE           1)      # 遥控器选择: 0=none, 1=sbus, 2=dt7
-set(REMOTE_VT_SOURCE        0)      # 图传选择:   0=none, 1=vt02, 2=vt03
-
-# REFEREE 参数
-set(REFEREE_UART            huart6) # 串口选择
+set(OFFLINE_BEEP_ENABLE     0)    # 测试兵种不蜂鸣

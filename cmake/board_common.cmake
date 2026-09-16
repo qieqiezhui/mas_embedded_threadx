@@ -32,6 +32,15 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 # Enable CMake support for ASM and C languages
 enable_language(C ASM)
 
+# Use ccache automatically when available
+# pass -DCMAKE_*_COMPILER_LAUNCHER= to disable it for a configure/build.
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM AND NOT DEFINED CMAKE_C_COMPILER_LAUNCHER)
+    set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+    set(CMAKE_ASM_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+    message(STATUS "ccache: ${CCACHE_PROGRAM}")
+endif()
+
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
 
@@ -41,6 +50,13 @@ add_subdirectory(cmake/stm32cubemx)
 # Add ThreadX RTOS
 add_subdirectory(${MAS_ROOT}/threadx threadx)
 
+# BSP 外设默认配置（板级可在 include 前覆盖）
+foreach(_bsp_mod DWT UART SPI I2C FLASH GPIO PWM LED BEEP CAN USB)
+    if(NOT DEFINED BSP_${_bsp_mod}_ENABLE)
+        set(BSP_${_bsp_mod}_ENABLE ON)
+    endif()
+endforeach()
+
 # Add shared project libraries
 add_subdirectory(${MAS_ROOT}/utils     ${CMAKE_CURRENT_BINARY_DIR}/utils)
 add_subdirectory(${MAS_ROOT}/board/bsp ${CMAKE_CURRENT_BINARY_DIR}/bsp)
@@ -48,10 +64,25 @@ add_subdirectory(${MAS_ROOT}/robot     ${CMAKE_CURRENT_BINARY_DIR}/robot)
 add_subdirectory(${MAS_ROOT}/modules   ${CMAKE_CURRENT_BINARY_DIR}/modules)
 add_subdirectory(${MAS_ROOT}/apps      ${CMAKE_CURRENT_BINARY_DIR}/apps)
 
+
+# CMSIS-DSP settings (M4/M7 通用)
+set(LOOPUNROLL ON CACHE BOOL "Loop unrolling for max performance" FORCE)
+set(DISABLEFLOAT16 ON CACHE BOOL "Disable float16 kernels (not needed on M4/M7)" FORCE)
+add_subdirectory(${MAS_ROOT}/CMSIS-DSP ${CMAKE_CURRENT_BINARY_DIR}/cmsisdsp)
+# Apply max performance compiler flags to CMSIS-DSP
+target_compile_options(CMSISDSP PRIVATE -O3 -ffast-math -fno-math-errno -flto)
+# Provide CMSIS-Core headers (cmsis_compiler.h) to CMSIS-DSP（板目录下的 Drivers）
+target_include_directories(CMSISDSP PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include)
+
+# BSP_USB_ENABLE OFF 时自动关闭 DWC2 端口
+if(NOT BSP_USB_ENABLE)
+    set(CONFIG_CHERRYUSB_DEVICE_DWC2_ST OFF CACHE BOOL "" FORCE)
+endif()
+
 # CherryUSB Device CDC ACM
 set(CONFIG_CHERRYUSB_DEVICE ON CACHE BOOL "Enable CherryUSB device stack" FORCE)
 set(CONFIG_CHERRYUSB_DEVICE_CDC_ACM ON CACHE BOOL "Enable CDC ACM class" FORCE)
-set(CONFIG_CHERRYUSB_DEVICE_DWC2_ST ON CACHE BOOL "Use DWC2 OTG with STM32 glue" FORCE)
+set(CONFIG_CHERRYUSB_DEVICE_DWC2_ST ON CACHE BOOL "Use DWC2 OTG with STM32 glue")
 set(CONFIG_CHERRYUSB_OSAL "threadx" CACHE STRING "Use ThreadX OS abstraction layer" FORCE)
 
 include(${MAS_ROOT}/CherryUSB/cherryusb.cmake)
@@ -65,15 +96,6 @@ target_include_directories(cherryusb PUBLIC
 )
 target_compile_options(cherryusb PRIVATE -O3 -ffast-math -fno-math-errno)
 target_link_libraries(cherryusb PUBLIC stm32cubemx azrtos::threadx utils)
-
-# CMSIS-DSP settings (M4/M7 通用)
-set(LOOPUNROLL ON CACHE BOOL "Loop unrolling for max performance" FORCE)
-set(DISABLEFLOAT16 ON CACHE BOOL "Disable float16 kernels (not needed on M4/M7)" FORCE)
-add_subdirectory(${MAS_ROOT}/CMSIS-DSP ${CMAKE_CURRENT_BINARY_DIR}/cmsisdsp)
-# Apply max performance compiler flags to CMSIS-DSP
-target_compile_options(CMSISDSP PRIVATE -O3 -ffast-math -fno-math-errno -flto)
-# Provide CMSIS-Core headers (cmsis_compiler.h) to CMSIS-DSP（板目录下的 Drivers）
-target_include_directories(CMSISDSP PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include)
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -98,3 +120,51 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 
 # Enable LTO at link stage (required for -flto compiled objects)
 target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -flto)
+
+# Run cppcheck against selected project directories.
+option(MAS_REQUIRE_CPPCHECK "Require cppcheck during configuration" OFF)
+find_program(CPPCHECK_PROGRAM cppcheck)
+if(CPPCHECK_PROGRAM)
+    set(_cppcheck_filters
+        --file-filter=${MAS_ROOT}/board/bsp/*
+        --file-filter=${MAS_ROOT}/modules/*
+        --file-filter=${MAS_ROOT}/apps/*
+        --file-filter=${MAS_ROOT}/utils/*
+    )
+    set(_cppcheck_options
+        --enable=warning,performance,portability,style
+        --inconclusive
+        --check-level=normal
+        --template=gcc
+        --inline-suppr
+        --suppress=missingIncludeSystem
+        --suppress=preprocessorErrorDirective
+        --suppress=*:*\/CMSIS-DSP\/*
+        --suppress=*:*\/CherryUSB\/*
+        --suppress=*:*\/threadx\/*
+        --suppress=*:*\/board/*\/Drivers\/CMSIS\/*
+        --suppress=unknownMacro:threadx\/*
+        --suppress=*:*\/utils\/ulog\/SEGGER_RTT.c
+        --suppress=*:*\/syscalls.c
+        --quiet
+    )
+
+    add_custom_target(cppcheck-log
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/cppcheck
+        COMMAND ${CPPCHECK_PROGRAM}
+            --project=${CMAKE_BINARY_DIR}/compile_commands.json
+            ${_cppcheck_filters}
+            --cppcheck-build-dir=${CMAKE_BINARY_DIR}/cppcheck
+            ${_cppcheck_options}
+            --output-file=${CMAKE_BINARY_DIR}/cppcheck/cppcheck.log
+            --error-exitcode=1
+        WORKING_DIRECTORY ${MAS_ROOT}
+        USES_TERMINAL
+        COMMENT "Generating cppcheck log"
+        VERBATIM
+    )
+elseif(MAS_REQUIRE_CPPCHECK)
+    message(FATAL_ERROR "cppcheck is required but was not found")
+else()
+    message(STATUS "cppcheck not found; target 'cppcheck-log' is unavailable")
+endif()
