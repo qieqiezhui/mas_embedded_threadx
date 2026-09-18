@@ -133,16 +133,16 @@ void gimbal_task(Gimbal_Ctrl_Cmd_t *gimbal_cmd,uint16_t *yaw_ecd)
             {
                 case gimbal_genius_mode:
                 
-                    Motor_DJI_Start(yaw_motor);
-                    Motor_DM_Start(pitch_motor);
-                    Motor_DJI_SetRef(yaw_motor, gimbal_cmd->yaw * DEGREE_2_RAD);
-                    Motor_DM_SetRef(pitch_motor, gimbal_cmd->pitch * DEGREE_2_RAD);
+                    Motor_Start((Motor_Base *)yaw_motor);
+                    Motor_Start((Motor_Base *)pitch_motor);
+                    Motor_SetRef((Motor_Base *)yaw_motor, gimbal_cmd->yaw * DEGREE_2_RAD);
+                    Motor_SetRef((Motor_Base *)pitch_motor, gimbal_cmd->pitch * DEGREE_2_RAD);
                     break;
 
                 case gimbal_sb_mode:
 
-                    Motor_DJI_Stop(yaw_motor);
-                    Motor_DM_Stop(pitch_motor);
+                    Motor_Stop((Motor_Base *)yaw_motor);
+                    Motor_Stop((Motor_Base *)pitch_motor);
                     break;
 
 
@@ -152,8 +152,8 @@ void gimbal_task(Gimbal_Ctrl_Cmd_t *gimbal_cmd,uint16_t *yaw_ecd)
         }
         else
         {
-            Motor_DJI_Stop(yaw_motor);
-            Motor_DM_Stop(pitch_motor);
+            Motor_Stop((Motor_Base *)yaw_motor);
+            Motor_Stop((Motor_Base *)pitch_motor);
         }
 
         if (!Module_Offline_get_device_status(yaw_motor->base.offline_dev) && yaw_ecd != NULL)
