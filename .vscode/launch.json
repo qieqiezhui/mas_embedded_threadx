@@ -133,5 +133,71 @@
                 ]
             }
         },
+        // f4_diansai dap-link
+        {
+            "name": "F4_Diansai_Daplink",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/f4_diansai.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "device": "STM32F407ZG",
+            "svdFile": "${workspaceFolder}/board/f4_diansai/STM32F407.svd",
+            "servertype": "openocd",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "target/stm32f4x.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build f4_diansai",
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
+            "showDevDebugOutput": "raw",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                    {
+                        "label": "",
+                        "port": 0,
+                        "type": "console"
+                    }
+                ]
+            }
+        },
+        // f4_diansai st-link
+        {
+            "name": "F4_Diansai_STlink",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/f4_diansai.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "device": "STM32F407ZG",
+            "svdFile": "${workspaceFolder}/board/f4_diansai/STM32F407.svd",
+            "servertype": "openocd",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "target/stm32f4x.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build f4_diansai",
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
+            "showDevDebugOutput": "raw",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                    {
+                        "label": "",
+                        "port": 0,
+                        "type": "console"
+                    }
+                ]
+            }
+        },
     ],
 }

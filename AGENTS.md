@@ -29,7 +29,7 @@
 - CI builds every discovered robot/board-role configuration for `damiao_h7` and `dji_c`, then runs cppcheck for merge requests targeting `dev`. It does not validate `f103_c8`.
 - `main` accepts merges only from this repository's `dev` branch. Pushing to `dev` triggers the automated merge into `dev-systemview`.
 - `.gitattributes` marks `threadx/**` and `utils/**` as `merge=ours` for the `dev` to `dev-systemview` merge. Before doing that merge locally, register the driver with `git config merge.ours.driver true`.
-- Flashing is hardware-dependent and supports only `damiao_h7` and `dji_c`; use `.vscode/flash_interactive.sh <board> <probe>` after building, with probe `stlink`, `daplink`, or `jlink`.
+- Flashing is hardware-dependent and supports only `damiao_h7`, `dji_c`, and `f4_diansai`; use `.vscode/flash_interactive.sh <board> <probe>` after building, with probe `stlink`, `daplink`, or `jlink`.
 
 ## Ponytail
 

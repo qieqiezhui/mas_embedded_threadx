@@ -7,7 +7,8 @@
             "description": "选择开发板",
             "options": [
                 "damiao_h7",
-                "dji_c"
+                "dji_c",
+                "f4_diansai"
             ],
             "default": "dji_c"
         },
@@ -83,6 +84,35 @@
                 "args": [
                     "-lc",
                     "cmake -S ${workspaceFolder}/board/dji_c -B ${workspaceFolder}/build/dji_c/Debug --preset Debug -G Ninja -DCMAKE_C_COMPILER_LAUNCHER=ccache && cmake --build ${workspaceFolder}/build/dji_c/Debug --config Debug -j $(nproc) && cp ${workspaceFolder}/build/dji_c/Debug/compile_commands.json ${workspaceFolder}/build/compile_commands.json && cp ${workspaceFolder}/build/dji_c/Debug/base.elf ${workspaceFolder}/build/dji_c.elf"
+                ]
+            }
+        },
+        {
+            "label": "Build f4_diansai",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": false,
+                "echo": true,
+                "showReuseMessage": false
+            },
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-Command",
+                    "cmake -S ${workspaceFolder}/board/f4_diansai -B ${workspaceFolder}/build/f4_diansai/Debug --preset Debug -G Ninja -DROBOT=diansai -DBOARD=single -DCMAKE_C_COMPILER_LAUNCHER=ccache; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; cmake --build ${workspaceFolder}/build/f4_diansai/Debug --config Debug -j ${env:NUMBER_OF_PROCESSORS}; Copy-Item -Path ${workspaceFolder}/build/f4_diansai/Debug/compile_commands.json -Destination ${workspaceFolder}/build/compile_commands.json -Force; Copy-Item -Path ${workspaceFolder}/build/f4_diansai/Debug/base.elf -Destination ${workspaceFolder}/build/f4_diansai.elf -Force"
+                ]
+            },
+            "linux": {
+                "command": "bash",
+                "args": [
+                    "-lc",
+                    "cmake -S ${workspaceFolder}/board/f4_diansai -B ${workspaceFolder}/build/f4_diansai/Debug --preset Debug -G Ninja -DROBOT=diansai -DBOARD=single -DCMAKE_C_COMPILER_LAUNCHER=ccache && cmake --build ${workspaceFolder}/build/f4_diansai/Debug --config Debug -j $(nproc) && cp ${workspaceFolder}/build/f4_diansai/Debug/compile_commands.json ${workspaceFolder}/build/compile_commands.json && cp ${workspaceFolder}/build/f4_diansai/Debug/base.elf ${workspaceFolder}/build/f4_diansai.elf"
                 ]
             }
         },

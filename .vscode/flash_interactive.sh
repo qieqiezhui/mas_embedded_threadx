@@ -22,6 +22,10 @@ case "$BOARD" in
     TARGET="stm32f4x"
     JLINK_DEV="STM32F407IG"
     ;;
+  f4_diansai)
+    TARGET="stm32f4x"
+    JLINK_DEV="STM32F407ZG"
+    ;;
   *)
     echo "[ERROR] Unknown board: $BOARD"
     exit 1

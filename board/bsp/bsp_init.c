@@ -56,8 +56,12 @@ void BSP_Init(void)
     BSP_DWT_Delay(0.1);
 #endif
 
+#if BSP_LED_ENABLE
     BSP_LED_Init();
+#endif
+#if BSP_BEEP_ENABLE
     BSP_BEEP_Init();
+#endif
 #if BSP_CAN_ENABLE
     BSP_CAN_TaskInit();
 #endif
