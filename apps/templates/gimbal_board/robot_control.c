@@ -14,7 +14,7 @@
 #include "module_vision.h"
 #include "tx_api.h"
 #include "bsp_def.h"
-#include "<robot>_def.h"   /* TODO: 改为 <你的机器人>_def.h */
+#include "<robot>_def.h" /* TODO: 改为 <你的机器人>_def.h */
 #include "gimbal_func.h"
 #include "shoot_func.h"
 #include "robot_func.h"
@@ -26,18 +26,18 @@
 static TX_THREAD                  robot_control_thread;
 APPS_STACK_SECTION static uint8_t robot_control_thread_stack[1024];
 
-static ReceivePacket *receive_packet = NULL;
-static SendPacket     send_packet;
-const static Ins_t   *ins = NULL;
+static VisionReceivePacket *receive_packet = NULL;
+static VisionSendPacket     send_packet;
+const static Ins_t         *ins = NULL;
 
 static Gimbal_Ctrl_Cmd_t gimbal_cmd;
 static Shoot_Ctrl_Cmd_t  shoot_cmd;
 static uint16_t          yaw_ecd;
 
 /* ── 板间通讯 ── */
-static Chassis_Ctrl_Cmd_t           chassis_cmd;
-static GimbalToChassis_cmd_t        chassis_send_cmd;
-static ChassisToGimbal_referee_t    chassis_upload_data;
+static Chassis_Ctrl_Cmd_t        chassis_cmd;
+static GimbalToChassis_cmd_t     chassis_send_cmd;
+static ChassisToGimbal_referee_t chassis_upload_data;
 
 static void robot_control_task(ULONG thread_input)
 {
@@ -45,6 +45,8 @@ static void robot_control_task(ULONG thread_input)
 
     while (1)
     {
+        Module_BoardComm_Receive(&chassis_upload_data, sizeof(ChassisToGimbal_referee_t));
+
         /* ── 遥控器控制输入 ── */
         RemoteControlSet(&chassis_cmd, &shoot_cmd, &gimbal_cmd);
 
@@ -59,7 +61,7 @@ static void robot_control_task(ULONG thread_input)
         receive_packet = Module_Vision_Receive();
 
         /* ── 云台控制 ── */
-        gimbal_func(&gimbal_cmd, &yaw_ecd);
+        const uint8_t yaw_ecd_valid = gimbal_func(&gimbal_cmd, &yaw_ecd);
 
         /* ── 发射机构控制 ── */
         shoot_func(&shoot_cmd);
@@ -69,15 +71,15 @@ static void robot_control_task(ULONG thread_input)
         chassis_send_cmd.vx           = (int8_t)(chassis_cmd.vx * 10.0f);
         chassis_send_cmd.vy           = (int8_t)(chassis_cmd.vy * 10.0f);
         chassis_send_cmd.wz           = (int8_t)(chassis_cmd.wz * 10.0f);
-        chassis_send_cmd.offset_angle = CalcOffsetAngle((float)yaw_ecd);
-        chassis_send_cmd.chassis_mode = chassis_cmd.chassis_mode;
+        chassis_send_cmd.offset_angle = yaw_ecd_valid ? CalcOffsetAngle((float)yaw_ecd) : 0;
+        chassis_send_cmd.chassis_mode = yaw_ecd_valid ? chassis_cmd.chassis_mode : chassis_zero_force;
         Module_BoardComm_Send((uint8_t *)&chassis_send_cmd, sizeof(GimbalToChassis_cmd_t));
 
         tx_thread_sleep(2);
     }
 }
 
-void robot_control_init(void)
+int robot_control_init(void)
 {
     UINT status;
 
@@ -86,23 +88,24 @@ void robot_control_init(void)
     if (ins == NULL)
     {
         LOG_E("ins is null");
-        return;
+        return -1;
     }
 
     /* ── 子系统初始化 ── */
-    gimbal_init();
-    shoot_init();
+    if (gimbal_init() != 0 || shoot_init() != 0)
+    {
+        return -1;
+    }
 
-    /* 板间通讯: 注册接收底盘板裁判数据 */
-    Module_BoardComm_RegisterRxBuffer(&chassis_upload_data, sizeof(ChassisToGimbal_referee_t));
-
-    status = tx_thread_create(&robot_control_thread, "robot_control_thread", robot_control_task, 0,
-                              robot_control_thread_stack, 1024, 30, 30, TX_NO_TIME_SLICE, TX_AUTO_START);
+    status = tx_thread_create(&robot_control_thread, "robot_control_thread", robot_control_task, 0, robot_control_thread_stack, 1024, 30, 30,
+                              TX_NO_TIME_SLICE, TX_AUTO_START);
     if (status != TX_SUCCESS)
     {
         LOG_E("robot_control_task failed!");
-        return;
+        return -1;
     }
 
     LOG_I("robot_control init success!");
+
+    return 0;
 }

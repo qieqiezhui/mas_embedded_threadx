@@ -5,6 +5,7 @@
 #include "module_ins.h"
 #include <stdint.h>
 #include <string.h>
+#include <math.h>
 #include "sentry_def.h"
 #include "user_lib.h"
 
@@ -36,10 +37,8 @@ void RemoteControlSet(Chassis_Ctrl_Cmd_t *Chassis_Ctrl, Shoot_Ctrl_Cmd_t *Shoot_
         /* 摇杆 → 云台系速度 (m/s), 与导航速度同单位
          * SBUS 通道值: 中位 1024, 上 240, 下 1807 → 零偏后 -784 ~ +783
          * 归一化到 -1.0 ~ +1.0 后乘满杆速度 */
-        Chassis_Ctrl->vx =
-            (float)Module_Remote_get_channel(2) / (float)(SBUS_CHX_DOWN - SBUS_CHX_BIAS) * CHASSIS_MAX_SPEED_MPS;
-        Chassis_Ctrl->vy =
-            (float)Module_Remote_get_channel(1) / (float)(SBUS_CHX_DOWN - SBUS_CHX_BIAS) * CHASSIS_MAX_SPEED_MPS;
+        Chassis_Ctrl->vx = (float)Module_Remote_get_channel(2) / (float)(SBUS_CHX_DOWN - SBUS_CHX_BIAS) * CHASSIS_MAX_SPEED_MPS;
+        Chassis_Ctrl->vy = (float)Module_Remote_get_channel(1) / (float)(SBUS_CHX_DOWN - SBUS_CHX_BIAS) * CHASSIS_MAX_SPEED_MPS;
 
         int16_t ch8 = Module_Remote_get_channel(8);
         if (ch8 == SBUS_CHX_UP)
@@ -108,8 +107,7 @@ void RemoteControlSet(Chassis_Ctrl_Cmd_t *Chassis_Ctrl, Shoot_Ctrl_Cmd_t *Shoot_
     }
 }
 
-void gimbal_auto_func(Chassis_Ctrl_Cmd_t *Chassis_Ctrl, Shoot_Ctrl_Cmd_t *Shoot_Ctrl, Gimbal_Ctrl_Cmd_t *Gimbal_Ctrl,const Ins_t *Ins,
-                      ReceivePacket *receive_packet)
+void gimbal_auto_func(Shoot_Ctrl_Cmd_t *Shoot_Ctrl, Gimbal_Ctrl_Cmd_t *Gimbal_Ctrl, const Ins_t *Ins, const VisionReceivePacket *receive_packet)
 {
     if (Gimbal_Ctrl == NULL || Gimbal_Ctrl->gimbal_mode != gimbal_auto_mode)
     {
@@ -123,48 +121,48 @@ void gimbal_auto_func(Chassis_Ctrl_Cmd_t *Chassis_Ctrl, Shoot_Ctrl_Cmd_t *Shoot_
         Shoot_Ctrl->load_mode    = load_stop;
         return;
     }
-    // 底盘设为自动模式
-    Chassis_Ctrl->chassis_mode = chassis_automode;
-
-    if (receive_packet != NULL && receive_packet->found != 0)
+    if (receive_packet != NULL && SMALL_YAW_PITCH_MIN_ANGLE * DEGREE_2_RAD < -receive_packet->target_pitch &&
+        -receive_packet->target_pitch < SMALL_YAW_PITCH_MAX_ANGLE * DEGREE_2_RAD)
     {
-        if (SMALL_YAW_PITCH_MIN_ANGLE*DEGREE_2_RAD < -receive_packet->target_pitch && -receive_packet->target_pitch < SMALL_YAW_PITCH_MAX_ANGLE*DEGREE_2_RAD)
+        // 进入跟踪模式
+        Gimbal_Ctrl->auto_search = 0;
+        Gimbal_Ctrl->pitch       = -receive_packet->target_pitch;
+        Gimbal_Ctrl->yaw         = receive_packet->target_yaw + Ins->YawRoundCount * 360.0f * DEGREE_2_RAD;
+        if (receive_packet->fire_advice == 1)
         {
-            // 进入跟踪模式
-            Gimbal_Ctrl->auto_search = 0;
-            Gimbal_Ctrl->pitch       = -receive_packet->target_pitch;
-            Gimbal_Ctrl->yaw         = receive_packet->target_yaw + Ins->YawRoundCount * 360.0f * DEGREE_2_RAD;
-            if (receive_packet->fire_advice == 1)
-            {
-                Shoot_Ctrl->load_mode = load_burstfire;
-            }
-            else
-            {
-                Shoot_Ctrl->load_mode = load_stop;
-            }
+            Shoot_Ctrl->load_mode = load_burstfire;
         }
         else
         {
-            // 进入搜索模式
-            Gimbal_Ctrl->auto_search = 1;
-            Shoot_Ctrl->load_mode    = load_stop;
+            Shoot_Ctrl->load_mode = load_stop;
         }
     }
     else
     {
-        // 无有效数据进入搜索模式
+        // 进入搜索模式
         Gimbal_Ctrl->auto_search = 1;
         Shoot_Ctrl->load_mode    = load_stop;
     }
+}
 
-    if (receive_packet->nav_state == 1)
+void nav_auto_func(Chassis_Ctrl_Cmd_t *Chassis_Ctrl, const NavReceivePacket *nav_packet)
+{
+    if (Chassis_Ctrl == NULL || Chassis_Ctrl->chassis_mode != chassis_automode)
     {
-        Chassis_Ctrl->vx = receive_packet->vx;
-        Chassis_Ctrl->vy = -receive_packet->vy;
+        return;
+    }
+
+    if (Module_Nav_Get_offline_state() == STATE_ONLINE && nav_packet != NULL && nav_packet->nav_state == 1 && isfinite(nav_packet->vx) &&
+        isfinite(nav_packet->vy) && isfinite(nav_packet->w))
+    {
+        Chassis_Ctrl->vx = nav_packet->vx;
+        Chassis_Ctrl->vy = -nav_packet->vy;
+        Chassis_Ctrl->wz = nav_packet->w;
     }
     else
     {
-        Chassis_Ctrl->vx = 0;
-        Chassis_Ctrl->vy = 0;
+        Chassis_Ctrl->vx = 0.0f;
+        Chassis_Ctrl->vy = 0.0f;
+        Chassis_Ctrl->wz = 0.0f;
     }
 }

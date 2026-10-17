@@ -1,12 +1,9 @@
 # 机器人 & 板型 配置
-# 默认值在这里改；也可用 -DROBOT=xxx -DBOARD=xxx 覆盖
-# 注意：已配置过的 build 目录以缓存值为准，改本文件默认值不影响旧 build 目录
+# 在这里选择机器人和板型；配置文件是构建配置的唯一来源
 
 # 目标机器人 & 板型
-set(ROBOT "test" CACHE STRING "Target robot")
-set_property(CACHE ROBOT PROPERTY STRINGS hero engineer infantry3 infantry4 infantry5 drone sentry darts customcontrol)
-set(BOARD "single" CACHE STRING "Board role")
-set_property(CACHE BOARD PROPERTY STRINGS single gimbal chassis)
+set(ROBOT "test") # hero / engineer / infantry3 / infantry4 / infantry5 / drone / sentry / darts / customcontrol / test
+set(BOARD "single") # single / gimbal / chassis
 
 # 板型校验
 if(NOT BOARD MATCHES "^(single|gimbal|chassis)$")
@@ -33,7 +30,7 @@ set(CHASSIS_BOARD 0)
 set(${BOARD_UPPER}_BOARD 1)
 
 # 模块开关
-foreach(_m OFFLINE REMOTE BMI088 INS REFEREE SUPERCAP WT606 MOTOR VISION BOARDCOMM)
+foreach(_m OFFLINE REMOTE BMI088 INS REFEREE SUPERCAP WT606 MOTOR VISION NAV BOARDCOMM LORA VOFA NRF24L01)
     set(MODULE_${_m} 0)
 endforeach()
 
